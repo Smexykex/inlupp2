@@ -20,7 +20,7 @@ void destroy_merch(merch_t *to_be_removed_merch)
   ioopm_linked_list_destroy(to_be_removed_merch->locations);
 }
 
-int hash_function_void(elem_t element) { return (int)element.any; }
+int hash_function_void(elem_t element) { return element.int_num; }
 
 bool ioopm_int_eq_function(elem_t a, elem_t b)
 {

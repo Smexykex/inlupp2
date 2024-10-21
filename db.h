@@ -1,7 +1,8 @@
 #pragma once
 
-#include <stdbool.h>
 #include "common.h"
+#include "hash_table.h"
+#include <stdbool.h>
 
 merch_t make_merch(char *name, char *desc, int price, ioopm_list_t *locations);
 
