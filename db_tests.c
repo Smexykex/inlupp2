@@ -2,6 +2,7 @@
 #include "common.h"
 #include "db.h"
 #include "ui.h"
+#include "linked_list.h"
 
 int init_suite(void) {
   // Change this function if you want to do something *before* you
@@ -98,7 +99,7 @@ int ioopm_string_sum_hash(const elem_t key1)
 
 void test_add_item_to_empty_db()
 {
-  ioopm_hash_table_t *merch_data_base = ioopm_hash_table_create(ioopm_str_eq_function, ioopm_int_eq_function, ioopm_string_sum_hash); 
+  ioopm_hash_table_t *merch_data_base = ioopm_hash_table_create(ioopm_string_sum_hash, ioopm_str_eq_function); 
 
   add_item_to_db(merch_data_base);
 
