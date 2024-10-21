@@ -1,8 +1,8 @@
 #pragma once
 
 #include <stdbool.h>
-#include "../inlupp1/hash_table.h"
-#include "../inlupp1/linked_list.h"
+#include "hash_table.h"
+#include "linked_list.h"
 
 struct merch
 {
