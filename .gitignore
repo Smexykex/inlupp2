@@ -1,0 +1,9 @@
+hash_table_tests
+freq_count
+*.dSYM
+*.out
+*.o
+
+#vscode
+settings.json
+launch.json
