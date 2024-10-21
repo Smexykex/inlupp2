@@ -7,7 +7,7 @@
 
 void print_item(merch_t *vara)
 {
-  printf("Name:  %s\nDesc:  %s\nPrice: %d.%d SEK\nShelf: %s\n", 
+  printf("Name:  %s\nDesc:  %s\nPrice: %d.%d SEK", 
     vara->namn, vara->beskrivning, (vara->pris) / 100, (vara->pris) % 100);
 }
 
@@ -78,7 +78,7 @@ char ask_question_menu()
 
 void event_loop()
 {
-  ioopm_hash_table_t *merch_data_base = ioopm_hash_table_create(ioopm_str_eq_function, ioopm_int_eq_function, hash_function_void);
+  ioopm_hash_table_t *merch_data_base = ioopm_hash_table_create(hash_function_void, ioopm_str_eq_function);
   char answer;
   void *cart_storage;
   int db_size = 0;
