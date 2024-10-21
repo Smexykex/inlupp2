@@ -1,16 +1,16 @@
 CC=gcc
 FLAGS=-pedantic -Wall -g
 
-inlupp1_common.o: ../inlupp1/common.c ../inlupp1/common.h
+inlupp1_common.o: common.c common.h
 	$(CC) $(FLAGS) $< -c -o inlupp1_common.o
 
-linked_list.o: ../inlupp1/linked_list.c ../inlupp1/linked_list.h
+linked_list.o: linked_list.c linked_list.h
 	$(CC) $(FLAGS) $< -c
 
-iterator.o: ../inlupp1/iterator.c ../inlupp1/iterator.h
+iterator.o: iterator.c iterator.h
 	$(CC) $(FLAGS) $< -c
 
-hash_table.o: ../inlupp1/hash_table.c ../inlupp1/hash_table.h
+hash_table.o: hash_table.c hash_table.h
 	$(CC) $(FLAGS) $< -c
 
 %.o: %.c %.h

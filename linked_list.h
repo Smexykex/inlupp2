@@ -3,28 +3,28 @@
  * @author Mauritz Sjödin, Alvin Ljung Hallgren
  * @date 6 Oct 2024
  * @brief Linked list and functions that operate on it.
- * Error handling is done with `assert`; we check if the pointer to the list is not `NULL`.
- * The functions `ioopm_linked_list_apply_to_all`, `ioopm_linked_list_all` and `ioopm_linked_list_any` 
- * all requires the function argument to be a defined valid function.
- * 
- * Linked listss are stored on the heap, so they must be freed with `ioopm_linked_list_destroy`.
+ * Error handling is done with `assert`; we check if the pointer to the list is
+ * not `NULL`. The functions `ioopm_linked_list_apply_to_all`,
+ * `ioopm_linked_list_all` and `ioopm_linked_list_any` all requires the function
+ * argument to be a defined valid function.
+ *
+ * Linked listss are stored on the heap, so they must be freed with
+ * `ioopm_linked_list_destroy`.
  */
 
 #pragma once
 
-#include <stdlib.h>
-#include <stdbool.h>
 #include "common.h"
-
-typedef bool ioopm_predicate(elem_t value, void *extra);
-typedef void ioopm_apply_function(elem_t *value, void *extra);
+#include <stdbool.h>
+#include <stdlib.h>
 
 /// @brief Creates a new empty list
 /// @param eq_func Function for determening equiality in the list
 /// @return an empty linked list
 ioopm_list_t *ioopm_linked_list_create(ioopm_eq_function *eq_func);
 
-/// @brief Tear down the linked list and return all its memory (but not the memory of the elements)
+/// @brief Tear down the linked list and return all its memory (but not the
+/// memory of the elements)
 /// @param list the list to be destroyed
 void ioopm_linked_list_destroy(ioopm_list_t *list);
 
@@ -44,7 +44,7 @@ void ioopm_linked_list_prepend(ioopm_list_t *list, elem_t value);
 /// the last element.
 /// @param list the linked list that will be extended
 /// @param index the position in the list
-/// @param value the value to be inserted 
+/// @param value the value to be inserted
 void ioopm_linked_list_insert(ioopm_list_t *list, int index, elem_t value);
 
 /// @brief Remove an element from a linked list in O(n) time.
@@ -87,23 +87,29 @@ void ioopm_linked_list_clear(ioopm_list_t *list);
 /// The function returns as soon as the return value can be determined.
 /// @param list the linked list
 /// @param prop the property to be tested (function pointer)
-/// @param extra an additional argument (may be NULL) that will be passed to all internal calls of prop
+/// @param extra an additional argument (may be NULL) that will be passed to all
+/// internal calls of prop
 /// @return true if prop holds for all elements in the list, else false
-bool ioopm_linked_list_all(ioopm_list_t *list, ioopm_predicate *prop, void *extra);
+bool ioopm_linked_list_all(ioopm_list_t *list, ioopm_predicate *prop,
+                           void *extra);
 
 /// @brief Test if a supplied property holds for any element in a list.
 /// The function returns as soon as the return value can be determined.
 /// @param list the linked list
 /// @param prop the property to be tested
-/// @param extra an additional argument (may be NULL) that will be passed to all internal calls of prop
+/// @param extra an additional argument (may be NULL) that will be passed to all
+/// internal calls of prop
 /// @return true if prop holds for any elements in the list, else false
-bool ioopm_linked_list_any(ioopm_list_t *list, ioopm_predicate *prop, void *extra);
+bool ioopm_linked_list_any(ioopm_list_t *list, ioopm_predicate *prop,
+                           void *extra);
 
 /// @brief Apply a supplied function to all elements in a list.
 /// @param list the linked list
 /// @param fun the function to be applied
-/// @param extra an additional argument (may be NULL) that will be passed to all internal calls of fun
-void ioopm_linked_list_apply_to_all(ioopm_list_t *list, ioopm_apply_function *fun, void *extra);
+/// @param extra an additional argument (may be NULL) that will be passed to all
+/// internal calls of fun
+void ioopm_linked_list_apply_to_all(ioopm_list_t *list,
+                                    ioopm_apply_function *fun, void *extra);
 
 /// @brief Get an iterator to a list
 /// @param list the linked list

@@ -1,11 +1,13 @@
+#include "common.h"
+#include "linked_list.h"
+#include "stdlib.h"
 #include <stdbool.h>
 #include <string.h>
-#include "common.h"
 
 bool shelf_equals(elem_t element_1, elem_t element_2)
 {
-  shelf_t shelf_1 = *(shelf_t *) element_1.any;
-  shelf_t shelf_2 = *(shelf_t *) element_2.any;
+  shelf_t shelf_1 = *(shelf_t *)element_1.any;
+  shelf_t shelf_2 = *(shelf_t *)element_2.any;
 
   return strcmp(shelf_1.name, shelf_2.name);
 }
@@ -18,10 +20,7 @@ void destroy_merch(merch_t *to_be_removed_merch)
   ioopm_linked_list_destroy(to_be_removed_merch->locations);
 }
 
-int hash_function_void(elem_t element)
-{
-  return (int) element.any;
-}
+int hash_function_void(elem_t element) { return (int)element.any; }
 
 bool ioopm_int_eq_function(elem_t a, elem_t b)
 {
@@ -30,11 +29,11 @@ bool ioopm_int_eq_function(elem_t a, elem_t b)
 
 bool ioopm_bool_eq_function(elem_t a, elem_t b)
 {
-    return a.boolean == b.boolean;
+  return a.boolean == b.boolean;
 }
 bool ioopm_float_eq_function(elem_t a, elem_t b)
 {
-    return a.float_num == b.float_num;
+  return a.float_num == b.float_num;
 }
 
 bool ioopm_str_eq_function(elem_t a, elem_t b)
