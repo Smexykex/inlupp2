@@ -3,7 +3,7 @@ freq_count
 *.dSYM
 *.out
 *.o
-
+c_cpp_properties.json
 #vscode
 settings.json
 launch.json
