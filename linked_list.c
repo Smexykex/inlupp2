@@ -189,7 +189,7 @@ bool ioopm_linked_list_all(ioopm_list_t *list, ioopm_predicate *prop,
   list_entry_t *curr_entry = list->first->next;
 
   while (curr_entry != NULL) {
-    if (!prop(curr_entry->value, (elem_t)extra, NULL)) {
+    if (!prop(curr_entry->value, p_elem(extra), NULL)) {
       return false;
     }
 
@@ -207,7 +207,7 @@ bool ioopm_linked_list_any(ioopm_list_t *list, ioopm_predicate *prop,
   list_entry_t *curr_entry = list->first->next;
 
   while (curr_entry != NULL) {
-    if (prop(curr_entry->value, (elem_t)extra, NULL)) {
+    if (prop(curr_entry->value, p_elem(extra), NULL)) {
       return true;
     }
 
