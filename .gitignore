@@ -1,5 +1,6 @@
-hash_table_tests
-freq_count
+data_base_tests
+ui_tests
+
 *.dSYM
 *.out
 *.o
