@@ -32,3 +32,5 @@ void checkout(ioopm_hash_table_t *cart_storage);
 
 // Todo: Fix memory leak when merch is in the actual database
 void destroy_merch(merch_t *to_be_removed_merch);
+
+void destroy_store(ioopm_hash_table_t *store);

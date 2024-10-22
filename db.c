@@ -116,7 +116,23 @@ void add_item_to_db(ioopm_hash_table_t *merch_data_base)
 
   elem_t merch_key = {.str = added_item->namn};
   elem_t merch_value = {.any = added_item};
+  
   ioopm_hash_table_insert(merch_data_base, merch_key, merch_value);
+}
+
+void destroy_store(ioopm_hash_table_t *store)
+{
+  size_t size = ioopm_hash_table_size(store);
+
+  elem_t *items = ioopm_hash_table_values(store);
+  
+  for (size_t i = 0; i < size; i++)
+  {
+    destroy_merch((merch_t *) items[i].any);
+  }
+  
+  ioopm_hash_table_destroy(store);
+  free(items);
 }
 
 void remove_item_from_db(ioopm_hash_table_t *merch_data_base)

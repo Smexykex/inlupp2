@@ -162,30 +162,3 @@ void event_loop()
   } while (answer != 'q');
 }
 
-// testing stuff
-
-int ioopm_string_sum_hash(const elem_t key1)
-{
-  int result = 0;
-  int i = 0;
-
-  while (key1.str[i] != '\0') {
-    result += key1.str[i];
-    i++;
-  }
-  return result;
-}
-
-int main()
-{
-  ioopm_hash_table_t *store =
-      ioopm_hash_table_create(ioopm_string_sum_hash, ioopm_str_eq_function);
-
-  add_item_to_db(store);
-  add_item_to_db(store);
-  add_item_to_db(store);
-  add_item_to_db(store);
-
-  printf("\n\n");
-  list_db(store);
-}

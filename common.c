@@ -18,6 +18,7 @@ void destroy_merch(merch_t *to_be_removed_merch)
   free(to_be_removed_merch->namn);
   free(to_be_removed_merch->beskrivning);
   ioopm_linked_list_destroy(to_be_removed_merch->locations);
+  free(to_be_removed_merch);
 }
 
 int hash_function_void(elem_t element) { return element.int_num; }

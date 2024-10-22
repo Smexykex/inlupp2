@@ -82,7 +82,9 @@ void test_input_merch()
   CU_ASSERT_EQUAL(made_item.pris, 100);
   CU_ASSERT_PTR_NOT_NULL(made_item.locations);
 
-  destroy_merch(&made_item);
+  free(made_item.namn);
+  free(made_item.beskrivning);
+  ioopm_linked_list_destroy(made_item.locations);
 }
 
 int ioopm_string_sum_hash(const elem_t key1)
@@ -104,50 +106,41 @@ void test_add_item_to_empty_db()
 
   add_item_to_db(merch_data_base);
 
-  elem_t merch_key = {.str = "alvin"};
+  elem_t merch_key = {.str = "max"};
   elem_t *added_item = ioopm_hash_table_lookup(merch_data_base, merch_key);
 
   if (added_item == NULL) {
     CU_ASSERT(false);
-    return;
+  }
+  else
+  {
+    merch_t *added_merch = added_item->any;
+
+    CU_ASSERT_STRING_EQUAL(added_merch->namn, "max");
+    CU_ASSERT_STRING_EQUAL(added_merch->beskrivning, "test description");
+    CU_ASSERT_EQUAL(added_merch->pris, 100);
+    CU_ASSERT_PTR_NOT_NULL(added_merch->locations);
   }
 
-  merch_t *added_merch = added_item->any;
-
-  CU_ASSERT_STRING_EQUAL(added_merch->namn, "alvin");
-  CU_ASSERT_STRING_EQUAL(added_merch->beskrivning, "test description");
-  CU_ASSERT_EQUAL(added_merch->pris, 100);
-  CU_ASSERT_PTR_NOT_NULL(added_merch->locations);
+  destroy_store(merch_data_base);
 }
 
-/* void test_remove_item_from_db()
+void test_remove_item_from_db()
 {
-  int limit = 3;
-  merch_t db[limit];
-  int db_size = 0;
+  ioopm_hash_table_t *merch_data_base = ioopm_hash_table_create(ioopm_string_sum_hash, ioopm_str_eq_function);
 
-  db_size = add_item_to_db(db, db_size);
-  db_size = add_item_to_db(db, db_size);
-  merch_t first_item = db[0];
-  merch_t second_item = db[1];
+  add_item_to_db(merch_data_base);
+  add_item_to_db(merch_data_base);
+  elem_t *first_item = ioopm_hash_table_lookup(merch_data_base, (elem_t) {.str = "delete1"});
+  elem_t *second_item = ioopm_hash_table_lookup(merch_data_base, (elem_t) {.str = "delete2"});
 
-  db_size = remove_item_from_db(db, db_size);
+  remove_item_from_db(merch_data_base);
 
-  merch_t new_first_item = db[0];
+  CU_ASSERT_EQUAL(ioopm_hash_table_size(merch_data_base), 1);
+  CU_ASSERT_FALSE(ioopm_hash_table_has_key(merch_data_base, (elem_t) {.str = "delete1"}));
 
-  CU_ASSERT_EQUAL(db_size, 1);
-
-  CU_ASSERT_STRING_NOT_EQUAL(new_first_item.namn, first_item.namn);
-  CU_ASSERT_STRING_NOT_EQUAL(new_first_item.beskrivning,
-first_item.beskrivning); CU_ASSERT_NOT_EQUAL(new_first_item.pris,
-first_item.pris); CU_ASSERT_STRING_NOT_EQUAL(new_first_item.lagerhylla,
-first_item.lagerhylla);
-
-  CU_ASSERT_STRING_EQUAL(new_first_item.namn, second_item.namn);
-  CU_ASSERT_STRING_EQUAL(new_first_item.beskrivning, second_item.beskrivning);
-  CU_ASSERT_EQUAL(new_first_item.pris, second_item.pris);
-  CU_ASSERT_STRING_EQUAL(new_first_item.lagerhylla, second_item.lagerhylla);
-} */
+  destroy_store(merch_data_base);
+}
 
 int main()
 {
