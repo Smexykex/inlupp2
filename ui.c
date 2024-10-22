@@ -1,39 +1,53 @@
+#include "common.h"
+#include "db.h"
+#include "stdlib.h"
+#include "utils.h"
+#include <ctype.h>
 #include <stdio.h>
 #include <string.h>
-#include <ctype.h>
-#include "common.h"
-#include "utils.h"
-#include "db.h"
+
+// TODO should make sme functions static
 
 void print_item(merch_t *vara)
 {
-  printf("Name:  %s\nDesc:  %s\nPrice: %d.%d SEK", 
-    vara->namn, vara->beskrivning, (vara->pris) / 100, (vara->pris) % 100);
+  printf("Name:  %10s | Desc:  %20s | Price: %d.%d SEK\n", vara->namn,
+         vara->beskrivning, (vara->pris) / 100, (vara->pris) % 100);
 }
 
-void print_line()
+void print_line() { puts("--------------------------------"); }
+
+static int cmpstringp(const void *p1, const void *p2)
 {
-puts("--------------------------------");
+  return strcmp((*(merch_t *const *)p1)->namn, (*(merch_t *const *)p2)->namn);
 }
 
-// DISCONTINUED. TODO: FIX
-/* void list_db(merch_t *items, int no_items)
+void list_db(ioopm_hash_table_t *store)
 {
-  if (no_items == 0)
-  {
+  size_t size = ioopm_hash_table_size(store);
+
+  if (size == 0) {
     return;
   }
-  
-  print_line();
 
-  for (int i = 0; i < no_items; i++)
-  {
-    merch_t current_item = items[i];
-    printf("%2d: %s\n", i + 1, current_item.namn);
+  merch_t **items = (merch_t **)ioopm_hash_table_values(store);
+
+  qsort(items, size, sizeof(elem_t *), cmpstringp);
+
+  for (int i = 0; i < size; i++) {
+    if (i != 0 && i % 20 == 0) {
+      char *answer;
+      do {
+        answer = ask_question_string("[L] for more, [N] to return");
+        if (answer[0] == 'n' || answer[0] == 'N') {
+          return;
+        }
+      } while (answer[0] != 'L');
+    }
+    print_item(items[i]);
   }
 
-  print_line();
-} */
+  free(items);
+}
 
 void print_menu()
 {
@@ -42,7 +56,7 @@ void print_menu()
               "[D]elete merch\n"
               "[E]dit merch\n"
               "[Q]uit\n";
-  printf("%s", str);  
+  printf("%s", str);
 }
 
 bool is_menu_option(char *input_string)
@@ -50,15 +64,13 @@ bool is_menu_option(char *input_string)
   char *valid_inputs = "AaLlDdEeQq";
   char check_char = input_string[0];
 
-  for (int i = 0; i < strlen(valid_inputs); i++)
-  {
-    if (check_char == valid_inputs[i])
-    {
+  for (int i = 0; i < strlen(valid_inputs); i++) {
+    if (check_char == valid_inputs[i]) {
       return true;
-    }   
+    }
   }
 
-  return false;    
+  return false;
 }
 
 char ask_question_menu()
@@ -66,110 +78,114 @@ char ask_question_menu()
   char answer[100];
   int string_size = 0;
 
-  do 
-  {
+  do {
     print_menu();
     string_size = read_string(answer, 99);
-  }
-  while (!(string_size == 1 && is_menu_option(answer)));
+  } while (!(string_size == 1 && is_menu_option(answer)));
 
   return answer[0];
 }
 
 void event_loop()
 {
-  ioopm_hash_table_t *merch_data_base = ioopm_hash_table_create(hash_function_void, ioopm_str_eq_function);
+  ioopm_hash_table_t *merch_data_base =
+      ioopm_hash_table_create(hash_function_void, ioopm_str_eq_function);
   char answer;
-  void *cart_storage;
+  void *cart_storage = NULL;
   int db_size = 0;
   int limit = 0;
 
-  do
-  {
+  do {
     answer = ask_question_menu();
     answer = tolower(answer);
 
-    switch (answer)
-    {
-    case 'a':
-      if (db_size == limit)
-      {
-        printf("\nDatabase full!\n");
-      }
-      else
-      {
-        add_item_to_db(merch_data_base);
-      }
-      break;
-    
-    /* case 'l':
-      if (db_size == 0)
-      {
-        printf("\nDatabase empty!\n\n");
-      }
-      else
-      {
-        list_db(db, db_size);
-      }
-      break; */
-
-    case 'd':
-      if (db_size == 0)
-      {
-        printf("\nDatabase empty!\n\n");
-      }
-      else
-      {
-        remove_item_from_db(merch_data_base);
-      }
-      break;
-
-    case 'e':
-      if (db_size == 0)
-      {
-        printf("\nDatabase empty!\n\n");
-      }
-      else
-      {
-        edit_db(merch_data_base);
-      }
-      break;
-    
-    case 's':
-      show_stock(merch_data_base);
-      break;
-    
-    case 'p':
-      replenish_stock(merch_data_base);
-      break;
-    
-    case 'c':
-      create_cart(cart_storage);
-      break;
-
-    case 'r':
-      remove_cart(cart_storage);
-      break;
-    
-    case '+':
-      add_to_cart(cart_storage);
-      break;
-    
-    case '-':
-      remove_from_cart(cart_storage);
-      break;
-    
-    case '=':
-      calculate_cost(cart_storage);
-      break;
-    
-    case 'o':
-      checkout(cart_storage);
-      break;
-
-    default:
+    switch (answer) {
+      case 'A':
+      case 'a':
+        if (db_size == limit) {
+          printf("\nDatabase full!\n");
+        } else {
+          add_item_to_db(merch_data_base);
+        }
+        break;
+      case 'L':
+      case 'l':
+        list_db(merch_data_base);
+        break;
+      case 'D':
+      case 'd':
+        if (db_size == 0) {
+          printf("\nDatabase empty!\n\n");
+        } else {
+          remove_item_from_db(merch_data_base);
+        }
+        break;
+      case 'E':
+      case 'e':
+        if (db_size == 0) {
+          printf("\nDatabase empty!\n\n");
+        } else {
+          edit_db(merch_data_base);
+        }
+        break;
+      case 'S':
+      case 's':
+        show_stock(merch_data_base);
+        break;
+      case 'P':
+      case 'p':
+        replenish_stock(merch_data_base);
+        break;
+      case 'C':
+      case 'c':
+        create_cart(cart_storage);
+        break;
+      case 'R':
+      case 'r':
+        remove_cart(cart_storage);
+        break;
+      case '+':
+        add_to_cart(cart_storage);
+        break;
+      case '-':
+        remove_from_cart(cart_storage);
+        break;
+      case '=':
+        calculate_cost(cart_storage);
+        break;
+      case 'O':
+        checkout(cart_storage);
+        break;
+      default:
         break;
     }
+  } while (answer != 'q');
+}
+
+// testing stuff
+
+int ioopm_string_sum_hash(const elem_t key1)
+{
+  int result = 0;
+  int i = 0;
+
+  while (key1.str[i] != '\0') {
+    result += key1.str[i];
+    i++;
   }
-  while (answer != 'q'); 
+  return result;
+}
+
+int main()
+{
+  ioopm_hash_table_t *store =
+      ioopm_hash_table_create(ioopm_string_sum_hash, ioopm_str_eq_function);
+
+  add_item_to_db(store);
+  add_item_to_db(store);
+  add_item_to_db(store);
+  add_item_to_db(store);
+
+  printf("\n\n");
+  list_db(store);
 }

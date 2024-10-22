@@ -1,16 +1,17 @@
-#include <CUnit/Basic.h>
 #include "common.h"
 #include "db.h"
-#include "ui.h"
 #include "linked_list.h"
+#include <CUnit/Basic.h>
 
-int init_suite(void) {
+int init_suite(void)
+{
   // Change this function if you want to do something *before* you
   // run a test suite
   return 0;
 }
 
-int clean_suite(void) {
+int clean_suite(void)
+{
   // Change this function if you want to do something *after* you
   // run a test suite
   return 0;
@@ -36,7 +37,7 @@ void test_make_merch(void)
 /* void test_is_item_false()
 {
   char *shelf1 = "aa21";
-  char *shelf2 = "2a1"; 
+  char *shelf2 = "2a1";
   char *shelf3 = "21A";
   char *shelf4 = " a12";
   char *shelf5 = "aA12";
@@ -89,8 +90,7 @@ int ioopm_string_sum_hash(const elem_t key1)
   int result = 0;
   int i = 0;
 
-  while (key1.str[i] != '\0')
-  {
+  while (key1.str[i] != '\0') {
     result += key1.str[i];
     i++;
   }
@@ -99,19 +99,19 @@ int ioopm_string_sum_hash(const elem_t key1)
 
 void test_add_item_to_empty_db()
 {
-  ioopm_hash_table_t *merch_data_base = ioopm_hash_table_create(ioopm_string_sum_hash, ioopm_str_eq_function); 
+  ioopm_hash_table_t *merch_data_base =
+      ioopm_hash_table_create(ioopm_string_sum_hash, ioopm_str_eq_function);
 
   add_item_to_db(merch_data_base);
 
-  elem_t merch_key = { .str = "alvin" };
+  elem_t merch_key = {.str = "alvin"};
   elem_t *added_item = ioopm_hash_table_lookup(merch_data_base, merch_key);
-  
-  if (added_item == NULL)
-  {
+
+  if (added_item == NULL) {
     CU_ASSERT(false);
     return;
   }
-  
+
   merch_t *added_merch = added_item->any;
 
   CU_ASSERT_STRING_EQUAL(added_merch->namn, "alvin");
@@ -134,13 +134,14 @@ void test_add_item_to_empty_db()
   db_size = remove_item_from_db(db, db_size);
 
   merch_t new_first_item = db[0];
-  
+
   CU_ASSERT_EQUAL(db_size, 1);
 
   CU_ASSERT_STRING_NOT_EQUAL(new_first_item.namn, first_item.namn);
-  CU_ASSERT_STRING_NOT_EQUAL(new_first_item.beskrivning, first_item.beskrivning);
-  CU_ASSERT_NOT_EQUAL(new_first_item.pris, first_item.pris);
-  CU_ASSERT_STRING_NOT_EQUAL(new_first_item.lagerhylla, first_item.lagerhylla);
+  CU_ASSERT_STRING_NOT_EQUAL(new_first_item.beskrivning,
+first_item.beskrivning); CU_ASSERT_NOT_EQUAL(new_first_item.pris,
+first_item.pris); CU_ASSERT_STRING_NOT_EQUAL(new_first_item.lagerhylla,
+first_item.lagerhylla);
 
   CU_ASSERT_STRING_EQUAL(new_first_item.namn, second_item.namn);
   CU_ASSERT_STRING_EQUAL(new_first_item.beskrivning, second_item.beskrivning);
@@ -148,14 +149,16 @@ void test_add_item_to_empty_db()
   CU_ASSERT_STRING_EQUAL(new_first_item.lagerhylla, second_item.lagerhylla);
 } */
 
-int main() {
+int main()
+{
   // First we try to set up CUnit, and exit if we fail
   if (CU_initialize_registry() != CUE_SUCCESS)
     return CU_get_error();
 
   // We then create an empty test suite and specify the name and
   // the init and cleanup functions
-  CU_pSuite my_test_suite = CU_add_suite("Data base test suite", init_suite, clean_suite);
+  CU_pSuite my_test_suite =
+      CU_add_suite("Data base test suite", init_suite, clean_suite);
   if (my_test_suite == NULL) {
     // If the test suite could not be added, tear down CUnit and exit
     CU_cleanup_registry();
@@ -167,18 +170,19 @@ int main() {
   // name or description of the test, and the function that runs
   // the test in question. If you want to add another test, just
   // copy a line below and change the information
-  if (
-    (CU_add_test(my_test_suite, "make_merch test", test_make_merch) == NULL) ||
-    (CU_add_test(my_test_suite, "input_merch test", test_input_merch) == NULL) ||
-    (CU_add_test(my_test_suite, "add_item_to_db on empty db test", test_add_item_to_empty_db) == NULL) ||
-    //(CU_add_test(my_test_suite, "remove_item_from_db test", test_remove_item_from_db) == NULL) ||
-    0
-  )
-    {
-      // If adding any of the tests fails, we tear down CUnit and exit
-      CU_cleanup_registry();
-      return CU_get_error();
-    }
+  if ((CU_add_test(my_test_suite, "make_merch test", test_make_merch) ==
+       NULL) ||
+      (CU_add_test(my_test_suite, "input_merch test", test_input_merch) ==
+       NULL) ||
+      (CU_add_test(my_test_suite, "add_item_to_db on empty db test",
+                   test_add_item_to_empty_db) == NULL) ||
+      //(CU_add_test(my_test_suite, "remove_item_from_db test",
+      //test_remove_item_from_db) == NULL) ||
+      0) {
+    // If adding any of the tests fails, we tear down CUnit and exit
+    CU_cleanup_registry();
+    return CU_get_error();
+  }
 
   // Set the running mode. Use CU_BRM_VERBOSE for maximum output.
   // Use CU_BRM_NORMAL to only print errors and a summary
