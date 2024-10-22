@@ -1,12 +1,24 @@
-#include "common.h"
-#include "db.h"
-#include "stdlib.h"
-#include "utils.h"
 #include <ctype.h>
 #include <stdio.h>
 #include <string.h>
 
-// TODO should make sme functions static
+#include "db.h"
+#include "stdlib.h"
+#include "ui.h"
+#include "utils.h"
+
+// TODO should make some functions static, though many are exposed for testing
+
+void input_merch(ioopm_hash_table_t *store)
+{
+  char *name = ask_question_string("Namn: ");
+  char *description = ask_question_string("Beskrivning: ");
+  int price = ask_question_int("Pris: ");
+
+  add_item_to_db(store, name, description, price);
+  free(name);
+  free(description);
+}
 
 void print_item(merch_t *vara)
 {
@@ -47,6 +59,41 @@ void list_db(ioopm_hash_table_t *store)
   }
 
   free(items);
+}
+
+void edit_db(ioopm_hash_table_t *store)
+{
+  char *name_to_edit;
+  elem_t *item;
+  merch_t *merch_to_edit;
+
+  do {
+    name_to_edit = ask_question_string("Input merch name to edit: ");
+    printf("%s\n", name_to_edit);
+    item = ioopm_hash_table_lookup(store, str_elem(name_to_edit));
+    free(name_to_edit);
+  } while (item == NULL);
+  merch_to_edit = (merch_t *)item->any;
+
+  print_item(merch_to_edit);
+
+  char *name;
+  while (true) {
+    name = ask_question_string("Input new name: ");
+    if (ioopm_hash_table_lookup(store, str_elem(name)) == NULL) {
+      break;
+    }
+    free(name);
+  }
+
+  char *description = ask_question_string("Input new description: ");
+  int price = ask_question_int("Input new price: ");
+
+  edit_merch(
+      store, merch_to_edit->namn,
+      (merch_t){.namn = name, .beskrivning = description, .pris = price});
+  free(name);
+  free(description);
 }
 
 void print_menu()
@@ -102,10 +149,10 @@ void event_loop()
     switch (answer) {
       case 'A':
       case 'a':
-        if (db_size == limit) {
+        if (db_size >= limit) {
           printf("\nDatabase full!\n");
         } else {
-          add_item_to_db(merch_data_base);
+          input_merch(merch_data_base);
         }
         break;
       case 'L':
@@ -161,4 +208,3 @@ void event_loop()
     }
   } while (answer != 'q');
 }
-

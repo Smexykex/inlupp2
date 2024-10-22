@@ -12,6 +12,11 @@ union elem {
   char *str;
 };
 
+#define str_elem(x)                                                            \
+  (elem_t) { .str = x }
+#define p_elem(x)                                                              \
+  (elem_t) { .any = x }
+
 typedef bool ioopm_eq_function(elem_t a, elem_t b);
 
 bool ioopm_int_eq_function(elem_t a, elem_t b);
@@ -56,15 +61,17 @@ struct shelf {
 
 typedef struct shelf shelf_t;
 
-/// Compares two elements and returns true if they are equal
-typedef bool ioopm_eq_function(elem_t a, elem_t b);
-
 typedef bool ioopm_predicate(elem_t key, elem_t value, void *extra);
 typedef void ioopm_apply_function(elem_t key, elem_t *value, void *extra);
 
 bool shelf_equals(elem_t element_1, elem_t element_2);
 
+merch_t *create_merch(char *namn, char *beskrivning, int pris,
+                      ioopm_list_t *locations);
+
 // Todo: Fix memory leak when merch is in the actual database
 void destroy_merch(merch_t *to_be_removed_merch);
 
 int hash_function_void(elem_t element);
+
+int ioopm_string_sum_hash(const elem_t key1);

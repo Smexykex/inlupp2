@@ -4,13 +4,10 @@
 #include "hash_table.h"
 #include <stdbool.h>
 
-merch_t make_merch(char *name, char *desc, int price, ioopm_list_t *locations);
+void edit_merch(ioopm_hash_table_t *store, char *name, merch_t new_value);
 
-merch_t input_merch();
-
-void edit_db(ioopm_hash_table_t *merch_data_base);
-
-void add_item_to_db(ioopm_hash_table_t *merch_data_base);
+void add_item_to_db(ioopm_hash_table_t *store, char *name, char *description,
+                    int price);
 
 void remove_item_from_db(ioopm_hash_table_t *merch_data_base);
 
