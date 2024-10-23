@@ -1,4 +1,5 @@
 #include <ctype.h>
+#include <stdbool.h>
 #include <stdio.h>
 #include <string.h>
 
@@ -33,11 +34,33 @@ static int cmpstringp(const void *p1, const void *p2)
   return strcmp((*(merch_t *const *)p1)->namn, (*(merch_t *const *)p2)->namn);
 }
 
+bool stop_listing(int current_item)
+{
+  char *answer;
+  bool stop = false;
+
+  if (current_item != 0 && current_item % 20 == 0)
+  {
+    do 
+    {
+      answer = ask_question_string("Press [N] to return, any other button for more");
+      stop = answer[0] == 'n' || answer[0] == 'N';
+
+      free(answer);
+    } 
+    while (!stop);
+  }
+
+  return stop;
+}
+
 void list_db(ioopm_hash_table_t *store)
 {
   size_t size = ioopm_hash_table_size(store);
 
-  if (size == 0) {
+  if (size == 0)
+  {
+    puts("Store is empty");
     return;
   }
 
@@ -45,17 +68,16 @@ void list_db(ioopm_hash_table_t *store)
 
   qsort(items, size, sizeof(elem_t *), cmpstringp);
 
-  for (int i = 0; i < size; i++) {
-    if (i != 0 && i % 20 == 0) {
-      char *answer;
-      do {
-        answer = ask_question_string("[L] for more, [N] to return");
-        if (answer[0] == 'n' || answer[0] == 'N') {
-          return;
-        }
-      } while (answer[0] != 'L');
+  for (int current_item = 0; current_item < size; current_item++)
+  {
+    if (stop_listing(current_item))
+    {
+      break;
     }
-    print_item(items[i]);
+    else
+    {
+      print_item(items[current_item]);
+    }
   }
 
   free(items);
