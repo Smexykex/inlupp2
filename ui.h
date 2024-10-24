@@ -11,6 +11,8 @@ void print_line();
 
 void list_db(ioopm_hash_table_t *store);
 
+void remove_item_from_db(ioopm_hash_table_t *merch_data_base);
+
 void edit_db(ioopm_hash_table_t *store);
 
 void print_menu();

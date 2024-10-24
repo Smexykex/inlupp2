@@ -3,6 +3,7 @@
 #include <stdio.h>
 #include <string.h>
 
+#include "common.h"
 #include "db.h"
 #include "hash_table.h"
 #include "stdlib.h"
@@ -13,7 +14,7 @@
 
 void input_merch(ioopm_hash_table_t *store)
 {
-  char *name = ask_question_string("Namn: ");
+  char *name = ask_question_string("\nNamn: ");
   char *description = ask_question_string("Beskrivning: ");
   int price = ask_question_int("Pris: ");
 
@@ -40,16 +41,14 @@ bool stop_listing(int current_item)
   char *answer;
   bool stop = false;
 
-  if (current_item != 0 && current_item % 20 == 0)
-  {
-    do 
-    {
-      answer = ask_question_string("Press [N] to return, any other button for more");
+  if (current_item != 0 && current_item % 20 == 0) {
+    do {
+      answer =
+          ask_question_string("Press [N] to return, any other button for more");
       stop = answer[0] == 'n' || answer[0] == 'N';
 
       free(answer);
-    } 
-    while (!stop);
+    } while (!stop);
   }
 
   return stop;
@@ -59,8 +58,7 @@ void list_db(ioopm_hash_table_t *store)
 {
   size_t size = ioopm_hash_table_size(store);
 
-  if (size == 0)
-  {
+  if (size == 0) {
     puts("Store is empty");
     return;
   }
@@ -69,19 +67,40 @@ void list_db(ioopm_hash_table_t *store)
 
   qsort(items, size, sizeof(elem_t *), cmpstringp);
 
-  for (int current_item = 0; current_item < size; current_item++)
-  {
-    if (stop_listing(current_item))
-    {
+  for (int current_item = 0; current_item < size; current_item++) {
+    if (stop_listing(current_item)) {
       break;
-    }
-    else
-    {
+    } else {
       print_item(items[current_item]);
     }
   }
 
   free(items);
+}
+
+void remove_item_from_db(ioopm_hash_table_t *merch_data_base)
+{
+  char *merch_name;
+  elem_t *retrived_value;
+
+  do {
+    merch_name = ask_question_string("\nInput merch name: ");
+    retrived_value =
+        ioopm_hash_table_lookup(merch_data_base, str_elem(merch_name));
+  } while (retrived_value == NULL);
+
+  char *confirmation =
+      ask_question_string("Do you want delete?, type 'y' for yes ");
+
+  if (tolower(confirmation[0]) == 'y') {
+    merch_t *retrived_merch = retrived_value->any;
+
+    ioopm_hash_table_remove(merch_data_base, str_elem(merch_name));
+    destroy_merch(retrived_merch);
+  }
+
+  free(confirmation);
+  free(merch_name);
 }
 
 void edit_db(ioopm_hash_table_t *store)
@@ -91,21 +110,24 @@ void edit_db(ioopm_hash_table_t *store)
   merch_t *merch_to_edit;
 
   do {
-    name_to_edit = ask_question_string("Input merch name to edit: ");
+    name_to_edit = ask_question_string("\nInput merch name to edit: ");
     printf("%s\n", name_to_edit);
     item = ioopm_hash_table_lookup(store, str_elem(name_to_edit));
+
     free(name_to_edit);
   } while (item == NULL);
-  merch_to_edit = (merch_t *)item->any;
 
+  merch_to_edit = (merch_t *)item->any;
   print_item(merch_to_edit);
 
   char *name;
+
   while (true) {
     name = ask_question_string("Input new name: ");
     if (ioopm_hash_table_lookup(store, str_elem(name)) == NULL) {
       break;
     }
+
     free(name);
   }
 
@@ -115,8 +137,7 @@ void edit_db(ioopm_hash_table_t *store)
   edit_merch(
       store, merch_to_edit->namn,
       (merch_t){.namn = name, .beskrivning = description, .pris = price});
-  
-  // Remove?
+
   free(name);
   free(description);
 }

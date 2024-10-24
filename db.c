@@ -7,6 +7,7 @@
 
 #include "common.h"
 #include "db.h"
+#include "linked_list.h"
 #include "utils.h"
 
 extern char *strdup(const char *);
@@ -31,17 +32,32 @@ char *ask_question_shelf(char *question)
   return string_answer;
 }
 
+// Creates an empty locations list if NULL
+merch_t *create_merch(char *namn, char *beskrivning, int pris,
+                      ioopm_list_t *locations)
+{
+  merch_t *merch = calloc(1, sizeof(merch_t));
+
+  merch->namn = strdup(namn);
+  merch->beskrivning = strdup(beskrivning);
+  merch->pris = pris;
+  merch->locations =
+      locations != NULL ? locations : ioopm_linked_list_create(shelf_equals);
+  return merch;
+}
+
 // does not edit locations
 void edit_merch(ioopm_hash_table_t *store, char *name, merch_t new_value)
 {
   merch_t *item =
-      (merch_t *)ioopm_hash_table_lookup(store, (elem_t){.str = name})->any;
+      (merch_t *)ioopm_hash_table_lookup(store, str_elem(name))->any;
   assert(item != NULL);
 
   ioopm_hash_table_remove(store, str_elem(name));
 
   free(item->namn);
   free(item->beskrivning);
+
   item->namn = strdup(new_value.namn);
   item->beskrivning = strdup(new_value.beskrivning);
   item->pris = new_value.pris;
@@ -50,17 +66,17 @@ void edit_merch(ioopm_hash_table_t *store, char *name, merch_t new_value)
   ioopm_hash_table_insert(store, str_elem(item->namn), p_elem(item));
 }
 
-void add_item_to_db(ioopm_hash_table_t *store, char *name, char *description,
-                    int price)
+void destroy_merch(merch_t *to_be_removed_merch)
 {
-  merch_t *merch = create_merch(name, description, price, NULL);
-  ioopm_hash_table_insert(store, str_elem(merch->namn), p_elem(merch));
+  free(to_be_removed_merch->namn);
+  free(to_be_removed_merch->beskrivning);
+  ioopm_linked_list_destroy(to_be_removed_merch->locations);
+  free(to_be_removed_merch);
 }
 
 void destroy_store(ioopm_hash_table_t *store)
 {
   size_t size = ioopm_hash_table_size(store);
-
   elem_t *items = ioopm_hash_table_values(store);
 
   for (size_t i = 0; i < size; i++) {
@@ -71,30 +87,11 @@ void destroy_store(ioopm_hash_table_t *store)
   free(items);
 }
 
-// TODO move to ui.c
-void remove_item_from_db(ioopm_hash_table_t *merch_data_base)
+void add_item_to_db(ioopm_hash_table_t *store, char *name, char *description,
+                    int price)
 {
-  char *merch_to_remove;
-  elem_t *retrived_value;
-
-  do {
-    merch_to_remove = ask_question_string("Input merch name: ");
-    retrived_value = ioopm_hash_table_lookup(merch_data_base,
-                                             (elem_t){.str = merch_to_remove});
-  } while (retrived_value == NULL);
-
-  char *confirmation =
-      ask_question_string("Do you want delete %s, type 'y' for yes ");
-
-  char *first_char = &confirmation[0];
-  *first_char = tolower(confirmation[0]);
-
-  if (strcmp(confirmation, "y")) {
-    merch_t *retrived_merch = retrived_value->any;
-    destroy_merch(retrived_merch);
-  }
-
-  free(merch_to_remove);
+  merch_t *merch = create_merch(name, description, price, NULL);
+  ioopm_hash_table_insert(store, str_elem(merch->namn), p_elem(merch));
 }
 
 // TODO

@@ -1,7 +1,11 @@
 #include "common.h"
 #include "db.h"
+#include "hash_table.h"
 #include "linked_list.h"
 #include <CUnit/Basic.h>
+#include <CUnit/CUnit.h>
+#include <assert.h>
+#include <time.h>
 
 int init_suite(void)
 {
@@ -15,23 +19,6 @@ int clean_suite(void)
   // Change this function if you want to do something *after* you
   // run a test suite
   return 0;
-}
-
-void test_make_merch(void)
-{
-  char *name = "alvin";
-  char *description = "test description";
-  int price = 100;
-  ioopm_list_t *merch_list = ioopm_linked_list_create(shelf_equals);
-
-  merch_t *made_item = create_merch(name, description, price, merch_list);
-
-  CU_ASSERT_STRING_EQUAL(made_item->namn, "alvin");
-  CU_ASSERT_STRING_EQUAL(made_item->beskrivning, "test description");
-  CU_ASSERT_EQUAL(made_item->pris, 100);
-  CU_ASSERT_PTR_EQUAL(made_item->locations, merch_list);
-
-  ioopm_linked_list_destroy(merch_list);
 }
 
 /* void test_is_item_false()
@@ -73,67 +60,65 @@ void test_is_item_true()
   CU_ASSERT(is_item(shelf4));
 } */
 
-// // TODO move to ui_tests
-// void test_input_merch()
-// {
-//   merch_t made_item = input_merch();
+void test_make_merch()
+{
+  char *name = "alvin";
+  char *description = "test description";
+  int price = 100;
+  ioopm_list_t *merch_list = ioopm_linked_list_create(shelf_equals);
 
-//   CU_ASSERT_STRING_EQUAL(made_item.namn, "alvin");
-//   CU_ASSERT_STRING_EQUAL(made_item.beskrivning, "test description");
-//   CU_ASSERT_EQUAL(made_item.pris, 100);
-//   CU_ASSERT_PTR_NOT_NULL(made_item.locations);
+  merch_t *made_item = create_merch(name, description, price, merch_list);
 
-//   free(made_item.namn);
-//   free(made_item.beskrivning);
-//   ioopm_linked_list_destroy(made_item.locations);
-// }
+  CU_ASSERT_STRING_EQUAL(made_item->namn, "alvin");
+  CU_ASSERT_STRING_EQUAL(made_item->beskrivning, "test description");
+  CU_ASSERT_EQUAL(made_item->pris, 100);
+  CU_ASSERT_PTR_EQUAL(made_item->locations, merch_list);
 
-// // TODO move to ui_tests
-// void test_add_item_to_empty_db()
-// {
-//   ioopm_hash_table_t *merch_data_base =
-//       ioopm_hash_table_create(ioopm_string_sum_hash, ioopm_str_eq_function);
+  destroy_merch(made_item);
+}
 
-//   input_merch(merch_data_base);
+void test_add_merch()
+{
+  ioopm_hash_table_t *store =
+      ioopm_hash_table_create(ioopm_string_sum_hash, ioopm_str_eq_function);
 
-//   elem_t merch_key = {.str = "max"};
-//   elem_t *added_item = ioopm_hash_table_lookup(merch_data_base, merch_key);
+  add_item_to_db(store, "alvin", "test", 100);
 
-//   if (added_item == NULL) {
-//     CU_ASSERT(false);
-//   } else {
-//     merch_t *added_merch = added_item->any;
+  merch_t *found_item = ioopm_hash_table_lookup(store, str_elem("alvin"))->any;
 
-//     CU_ASSERT_STRING_EQUAL(added_merch->namn, "max");
-//     CU_ASSERT_STRING_EQUAL(added_merch->beskrivning, "test description");
-//     CU_ASSERT_EQUAL(added_merch->pris, 100);
-//     CU_ASSERT_PTR_NOT_NULL(added_merch->locations);
-//   }
+  CU_ASSERT_STRING_EQUAL(found_item->namn, "alvin");
+  CU_ASSERT_STRING_EQUAL(found_item->beskrivning, "test");
+  CU_ASSERT_EQUAL(found_item->pris, 100);
+  CU_ASSERT_PTR_NOT_NULL(found_item->locations);
 
-//   destroy_store(merch_data_base);
-// }
+  destroy_store(store);
+}
 
-// // TODO move to ui_tests
-// void test_remove_item_from_db()
-// {
-//   ioopm_hash_table_t *merch_data_base =
-//       ioopm_hash_table_create(ioopm_string_sum_hash, ioopm_str_eq_function);
+void test_edit_merch()
+{
+  ioopm_hash_table_t *store =
+      ioopm_hash_table_create(ioopm_string_sum_hash, ioopm_str_eq_function);
 
-//   add_item_to_db(merch_data_base);
-//   add_item_to_db(merch_data_base);
-//   elem_t *first_item =
-//       ioopm_hash_table_lookup(merch_data_base, (elem_t){.str = "delete1"});
-//   elem_t *second_item =
-//       ioopm_hash_table_lookup(merch_data_base, (elem_t){.str = "delete2"});
+  add_item_to_db(store, "alvin", "test", 100);
 
-//   remove_item_from_db(merch_data_base);
+  merch_t *old_item = ioopm_hash_table_lookup(store, str_elem("alvin"))->any;
+  merch_t new_item = {.namn = "max",
+                      .beskrivning = "new desc",
+                      .pris = 200,
+                      .locations = old_item->locations};
 
-//   CU_ASSERT_EQUAL(ioopm_hash_table_size(merch_data_base), 1);
-//   CU_ASSERT_FALSE(
-//       ioopm_hash_table_has_key(merch_data_base, (elem_t){.str = "delete1"}));
+  edit_merch(store, "alvin", new_item);
 
-//   destroy_store(merch_data_base);
-// }
+  merch_t *edited_item = ioopm_hash_table_lookup(store, str_elem("max"))->any;
+  assert(edited_item != NULL);
+
+  CU_ASSERT_STRING_EQUAL(edited_item->namn, "max");
+  CU_ASSERT_STRING_EQUAL(edited_item->beskrivning, "new desc");
+  CU_ASSERT_EQUAL(edited_item->pris, 200);
+  CU_ASSERT_PTR_EQUAL(edited_item->locations, old_item->locations);
+
+  destroy_store(store);
+}
 
 int main()
 {
@@ -158,12 +143,10 @@ int main()
   // copy a line below and change the information
   if ((CU_add_test(my_test_suite, "make_merch test", test_make_merch) ==
        NULL) ||
-      // (CU_add_test(my_test_suite, "input_merch test", test_input_merch) ==
-      //  NULL) ||
-      // (CU_add_test(my_test_suite, "add_item_to_db on empty db test",
-      //              test_add_item_to_empty_db) == NULL) ||
-      //(CU_add_test(my_test_suite, "remove_item_from_db test",
-      // test_remove_item_from_db) == NULL) ||
+      (CU_add_test(my_test_suite, "add_item_to_db test", test_add_merch) ==
+       NULL) ||
+      (CU_add_test(my_test_suite, "edit_merch test", test_edit_merch) ==
+       NULL) ||
       0) {
     // If adding any of the tests fails, we tear down CUnit and exit
     CU_cleanup_registry();
