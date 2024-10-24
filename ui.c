@@ -4,6 +4,7 @@
 #include <string.h>
 
 #include "db.h"
+#include "hash_table.h"
 #include "stdlib.h"
 #include "ui.h"
 #include "utils.h"
@@ -114,6 +115,8 @@ void edit_db(ioopm_hash_table_t *store)
   edit_merch(
       store, merch_to_edit->namn,
       (merch_t){.namn = name, .beskrivning = description, .pris = price});
+  
+  // Remove?
   free(name);
   free(description);
 }
@@ -124,13 +127,21 @@ void print_menu()
               "[L]ist merch\n"
               "[D]elete merch\n"
               "[E]dit merch\n"
+              "[S]how stock\n"
+              "Re[P]lenish stock\n"
+              "[C]reate cart\n"
+              "[R]emove cart\n"
+              "[+] Add to cart\n"
+              "[-] Remove from cart\n"
+              "[=] Calculate cost\n"
+              "Check[O]ut\n"
               "[Q]uit\n";
   printf("%s", str);
 }
 
 bool is_menu_option(char *input_string)
 {
-  char *valid_inputs = "AaLlDdEeQq";
+  char *valid_inputs = "AaLlDdEeSsPpCcRr+-=OoQq";
   char check_char = input_string[0];
 
   for (int i = 0; i < strlen(valid_inputs); i++) {
@@ -142,6 +153,7 @@ bool is_menu_option(char *input_string)
   return false;
 }
 
+// Could maybe rewrite using ask_question
 char ask_question_menu()
 {
   char answer[100];
@@ -157,6 +169,7 @@ char ask_question_menu()
 
 void event_loop()
 {
+  // Change hash function?
   ioopm_hash_table_t *merch_data_base =
       ioopm_hash_table_create(hash_function_void, ioopm_str_eq_function);
   char answer;
@@ -166,51 +179,33 @@ void event_loop()
 
   do {
     answer = ask_question_menu();
-    answer = tolower(answer);
+
+    // answer should always be upper case
+    answer = toupper(answer);
 
     switch (answer) {
       case 'A':
-      case 'a':
-        if (db_size >= limit) {
-          printf("\nDatabase full!\n");
-        } else {
-          input_merch(merch_data_base);
-        }
+        input_merch(merch_data_base);
         break;
       case 'L':
-      case 'l':
         list_db(merch_data_base);
         break;
       case 'D':
-      case 'd':
-        if (db_size == 0) {
-          printf("\nDatabase empty!\n\n");
-        } else {
-          remove_item_from_db(merch_data_base);
-        }
+        remove_item_from_db(merch_data_base);
         break;
       case 'E':
-      case 'e':
-        if (db_size == 0) {
-          printf("\nDatabase empty!\n\n");
-        } else {
-          edit_db(merch_data_base);
-        }
+        edit_db(merch_data_base);
         break;
       case 'S':
-      case 's':
         show_stock(merch_data_base);
         break;
       case 'P':
-      case 'p':
         replenish_stock(merch_data_base);
         break;
       case 'C':
-      case 'c':
         create_cart(cart_storage);
         break;
       case 'R':
-      case 'r':
         remove_cart(cart_storage);
         break;
       case '+':
@@ -228,5 +223,7 @@ void event_loop()
       default:
         break;
     }
-  } while (answer != 'q');
+  } while (answer != 'Q');
+
+  destroy_store(merch_data_base);
 }
