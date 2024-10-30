@@ -30,9 +30,12 @@ memtestui: ui_tests all_tests.txt
 	valgrind --leak-check=full ./ui_tests < ./test_files/all_tests.txt
 
 # Check leaks on macOS
-testuileaks: ui_tests ui_testfile.txt
-	leaks -quiet -atExit -- ./ui_tests < ui_testfile.txt
-	
+testdbleaks: testdb
+	leaks -quiet -atExit -- ./data_base_tests
+
+testuileaks: testui
+	leaks -quiet -atExit -- ./ui_tests < ./test_files/all_tests.txt
+
 clean:
 	rm *.o data_base_tests ui_tests
 
