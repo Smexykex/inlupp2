@@ -3,6 +3,7 @@
 #include "common.h"
 #include "db.h"
 #include "hash_table.h"
+#include "linked_list.h"
 #include "ui.h"
 
 int init_suite(void)
@@ -84,6 +85,46 @@ void test_edit_item()
   destroy_store(store);
 }
 
+void test_replenish_stock()
+{
+  ioopm_hash_table_t *store =
+      ioopm_hash_table_create(ioopm_string_sum_hash, ioopm_str_eq_function);
+
+  add_item_to_db(store, "alvin", "test description", 100);
+
+  // Add location A01
+  replenish_stock(store);
+  merch_t *merch = ioopm_hash_table_lookup(store, str_elem("alvin"))->any;
+
+  location_t *a01 = ioopm_linked_list_get(merch->locations, 0).any;
+  CU_ASSERT_PTR_NOT_NULL(a01);
+  CU_ASSERT_STRING_EQUAL(a01->shelf, "A01");
+  CU_ASSERT_EQUAL(a01->quantity, 1);
+
+  // Input location A01 again, should increase quantity
+  replenish_stock(store);
+
+  CU_ASSERT_EQUAL(a01->quantity, 2);
+
+  // Not existing location B02, should add new location
+  replenish_stock(store);
+
+  location_t *b02 = ioopm_linked_list_get(merch->locations, 1).any;
+  CU_ASSERT_PTR_NOT_NULL(b02);
+  CU_ASSERT_STRING_EQUAL(b02->shelf, "B02");
+  CU_ASSERT_EQUAL(b02->quantity, 1);
+
+  // Input location B02 again, should increase quantity
+  replenish_stock(store);
+
+  CU_ASSERT_EQUAL(a01->quantity, 2);
+
+  // Finally show stock, need to verify correct in output
+  show_stock(store);
+
+  destroy_store(store);
+}
+
 int main()
 {
   if (CU_initialize_registry() != CUE_SUCCESS)
@@ -97,9 +138,12 @@ int main()
     return CU_get_error();
   }
 
-  if (CU_add_test(my_test_suite, "Add item", test_input_merch) == NULL ||
-      CU_add_test(my_test_suite, "Remove item", test_remove_item) == NULL ||
-      CU_add_test(my_test_suite, "Edit item", test_edit_item) == NULL || 0) {
+  if ((CU_add_test(my_test_suite, "Add item", test_input_merch) == NULL ||
+       CU_add_test(my_test_suite, "Remove item", test_remove_item) == NULL ||
+       CU_add_test(my_test_suite, "Edit item", test_edit_item) == NULL) ||
+      CU_add_test(my_test_suite, "Replenish stock", test_replenish_stock) ==
+          NULL ||
+      0) {
     CU_cleanup_registry();
     return CU_get_error();
   }

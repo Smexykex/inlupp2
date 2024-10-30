@@ -16,10 +16,6 @@ void destroy_store(ioopm_hash_table_t *store);
 void add_item_to_db(ioopm_hash_table_t *store, char *name, char *description,
                     int price);
 
-void show_stock(ioopm_hash_table_t *merch_data_base);
-
-void replenish_stock(ioopm_hash_table_t *merch_data_base);
-
 void create_cart(ioopm_hash_table_t *cart_storage);
 
 void remove_cart(ioopm_hash_table_t *cart_storage);

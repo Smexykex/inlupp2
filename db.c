@@ -1,5 +1,4 @@
 #include <assert.h>
-#include <ctype.h>
 #include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -7,30 +6,11 @@
 
 #include "common.h"
 #include "db.h"
+#include "iterator.h"
 #include "linked_list.h"
 #include "utils.h"
 
 extern char *strdup(const char *);
-
-bool is_item(char *shelf)
-{
-  char *copy_of_shelf = string_lower(shelf);
-  if (!(copy_of_shelf[0] > 96 && copy_of_shelf[0] < 123)) {
-    return false;
-  } else {
-    bool is_remainder_a_number = is_number(copy_of_shelf + 1);
-    free(copy_of_shelf);
-    return is_remainder_a_number;
-  }
-}
-
-char *ask_question_shelf(char *question)
-{
-  answer_t ans = ask_question(question, is_item, (convert_func *)strdup);
-  char *string_answer = ans.string_value;
-  string_answer[0] = toupper(string_answer[0]);
-  return string_answer;
-}
 
 // Creates an empty locations list if NULL
 merch_t *create_merch(char *namn, char *beskrivning, int pris,
@@ -66,12 +46,18 @@ void edit_merch(ioopm_hash_table_t *store, char *name, merch_t new_value)
   ioopm_hash_table_insert(store, str_elem(item->namn), p_elem(item));
 }
 
-void destroy_merch(merch_t *to_be_removed_merch)
+void destroy_merch(merch_t *merch)
 {
-  free(to_be_removed_merch->namn);
-  free(to_be_removed_merch->beskrivning);
-  ioopm_linked_list_destroy(to_be_removed_merch->locations);
-  free(to_be_removed_merch);
+  free(merch->namn);
+  free(merch->beskrivning);
+
+  ioopm_list_iterator_t *iterator = ioopm_list_iterator(merch->locations);
+  while (ioopm_iterator_has_next(iterator)) {
+    free(ioopm_iterator_next(iterator).any);
+  }
+
+  ioopm_linked_list_destroy(merch->locations);
+  free(merch);
 }
 
 void destroy_store(ioopm_hash_table_t *store)
@@ -93,12 +79,6 @@ void add_item_to_db(ioopm_hash_table_t *store, char *name, char *description,
   merch_t *merch = create_merch(name, description, price, NULL);
   ioopm_hash_table_insert(store, str_elem(merch->namn), p_elem(merch));
 }
-
-// TODO
-void show_stock(ioopm_hash_table_t *db) { puts("Not yet implemented!"); }
-
-// TODO
-void replenish_stock(ioopm_hash_table_t *db) { puts("Not yet implemented!"); }
 
 // TODO
 void create_cart(ioopm_hash_table_t *cart_storage)

@@ -12,6 +12,7 @@ union elem {
   char *str;
 };
 
+// should make consistent (either str_elem and ptr_elem or s_elem and p_elem)
 #define str_elem(x)                                                            \
   (elem_t) { .str = x }
 #define p_elem(x)                                                              \
@@ -45,6 +46,7 @@ typedef struct ioopm_list_iterator {
   ioopm_list_t *list;    // The underlying list
 } ioopm_list_iterator_t;
 
+typedef struct merch merch_t;
 struct merch {
   char *namn;
   char *beskrivning;
@@ -52,17 +54,16 @@ struct merch {
   ioopm_list_t *locations;
 };
 
-typedef struct merch merch_t;
-
-struct shelf {
-  char *name;
-  int no_items;
+typedef struct location location_t;
+struct location {
+  char *shelf;
+  int quantity;
 };
-
-typedef struct shelf shelf_t;
 
 typedef bool ioopm_predicate(elem_t key, elem_t value, void *extra);
 typedef void ioopm_apply_function(elem_t key, elem_t *value, void *extra);
+
+bool is_valid_shelf(char *shelf);
 
 bool shelf_equals(elem_t element_1, elem_t element_2);
 

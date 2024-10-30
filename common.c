@@ -1,13 +1,30 @@
-#include "common.h"
+#include <ctype.h>
 #include <stdbool.h>
 #include <string.h>
 
+#include "common.h"
+
+bool is_valid_shelf(char *shelf)
+{
+  if (!isalpha(*shelf)) {
+    return false;
+  }
+  ++shelf;
+  while (*shelf != '\0') {
+    if (!isdigit(*shelf)) {
+      return false;
+    }
+    ++shelf;
+  }
+  return true;
+}
+
 bool shelf_equals(elem_t element_1, elem_t element_2)
 {
-  shelf_t shelf_1 = *(shelf_t *)element_1.any;
-  shelf_t shelf_2 = *(shelf_t *)element_2.any;
+  location_t shelf_1 = *(location_t *)element_1.any;
+  location_t shelf_2 = *(location_t *)element_2.any;
 
-  return strcmp(shelf_1.name, shelf_2.name);
+  return strcmp(shelf_1.shelf, shelf_2.shelf) == 0;
 }
 
 int hash_function_void(elem_t element) { return element.int_num; }

@@ -6,11 +6,42 @@
 #include "common.h"
 #include "db.h"
 #include "hash_table.h"
+#include "iterator.h"
+#include "linked_list.h"
 #include "stdlib.h"
 #include "ui.h"
 #include "utils.h"
 
 // TODO should make some functions static, though many are exposed for testing
+
+// Asks question until a name that is in the hash table is entered.
+static merch_t *ask_question_merch(ioopm_hash_table_t *store, char *question)
+{
+  merch_t *merch;
+  char *name;
+
+  do {
+    name = ask_question_string(question);
+    merch = ioopm_hash_table_lookup(store, str_elem(name))->any;
+    free(name);
+  } while (merch == NULL);
+  return merch;
+}
+
+static char *ask_question_shelf(char *question)
+{
+  char *shelf;
+  while (true) {
+    shelf = ask_question_string(question);
+    if (is_valid_shelf(shelf)) {
+      break;
+    }
+    free(shelf);
+  }
+  // Lower case inputs are capitalised
+  shelf[0] = toupper(shelf[0]);
+  return shelf;
+}
 
 void input_merch(ioopm_hash_table_t *store)
 {
@@ -103,6 +134,7 @@ void remove_item_from_db(ioopm_hash_table_t *merch_data_base)
   free(merch_name);
 }
 
+// TODO A better name might be edit item
 void edit_db(ioopm_hash_table_t *store)
 {
   char *name_to_edit;
@@ -140,6 +172,38 @@ void edit_db(ioopm_hash_table_t *store)
 
   free(name);
   free(description);
+}
+
+void show_stock(ioopm_hash_table_t *store)
+{
+  merch_t *merch = ask_question_merch(store, "\nInput merch name: ");
+
+  ioopm_list_iterator_t *iterator = ioopm_list_iterator(merch->locations);
+  while (ioopm_iterator_has_next(iterator)) {
+    location_t *location = ioopm_iterator_next(iterator).any;
+    printf("Shelf %s: %3d items\n", location->shelf, location->quantity);
+  }
+}
+
+void replenish_stock(ioopm_hash_table_t *store)
+{
+  merch_t *merch = ask_question_merch(store, "\nInput merch name: ");
+  char *shelf = ask_question_shelf("\nInput shelf: ");
+
+  ioopm_list_iterator_t *iterator = ioopm_list_iterator(merch->locations);
+  while (ioopm_iterator_has_next(iterator)) {
+    location_t *location = ioopm_iterator_next(iterator).any;
+    if (strcmp(location->shelf, shelf) == 0) {
+      location->quantity++;
+      return;
+    }
+  }
+
+  location_t *new_location = calloc(1, sizeof(location_t));
+  new_location->shelf = shelf;
+  new_location->quantity = 1;
+
+  ioopm_linked_list_append(merch->locations, p_elem(new_location));
 }
 
 void print_menu()
@@ -195,8 +259,6 @@ void event_loop()
       ioopm_hash_table_create(hash_function_void, ioopm_str_eq_function);
   char answer;
   void *cart_storage = NULL;
-  int db_size = 0;
-  int limit = 0;
 
   do {
     answer = ask_question_menu();
