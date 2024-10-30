@@ -53,8 +53,11 @@ void destroy_merch(merch_t *merch)
 
   ioopm_list_iterator_t *iterator = ioopm_list_iterator(merch->locations);
   while (ioopm_iterator_has_next(iterator)) {
-    free(ioopm_iterator_next(iterator).any);
+    location_t *location = ioopm_iterator_next(iterator).any;
+    free(location->shelf);
+    free(location);
   }
+  free(iterator);
 
   ioopm_linked_list_destroy(merch->locations);
   free(merch);
@@ -66,7 +69,7 @@ void destroy_store(ioopm_hash_table_t *store)
   elem_t *items = ioopm_hash_table_values(store);
 
   for (size_t i = 0; i < size; i++) {
-    destroy_merch((merch_t *)items[i].any);
+    destroy_merch(items[i].any);
   }
 
   ioopm_hash_table_destroy(store);
@@ -78,6 +81,64 @@ void add_item_to_db(ioopm_hash_table_t *store, char *name, char *description,
 {
   merch_t *merch = create_merch(name, description, price, NULL);
   ioopm_hash_table_insert(store, str_elem(merch->namn), p_elem(merch));
+}
+
+bool is_shelf_taken(ioopm_hash_table_t *store, char *shelf)
+{
+  size_t size = ioopm_hash_table_size(store);
+  elem_t *items = ioopm_hash_table_values(store);
+
+  merch_t *item;
+  location_t *location;
+
+  for (size_t i = 0; i < size; i++) {
+    item = items[i].any;
+
+    ioopm_list_iterator_t *iterator = ioopm_list_iterator(item->locations);
+    while (ioopm_iterator_has_next(iterator)) {
+      location = ioopm_iterator_next(iterator).any;
+      if (strcmp(location->shelf, shelf) == 0) {
+        free(iterator);
+        free(items);
+        return true;
+      }
+    }
+    free(iterator);
+  }
+  free(items);
+  return false;
+}
+
+bool increase_stock(ioopm_hash_table_t *store, char *merch_name, char *shelf)
+{
+  if (!is_valid_shelf(shelf)) {
+    return false;
+  }
+  merch_t *merch = ioopm_hash_table_lookup(store, str_elem(merch_name))->any;
+  if (merch == NULL) {
+    return false;
+  }
+  ioopm_list_iterator_t *iterator = ioopm_list_iterator(merch->locations);
+  while (ioopm_iterator_has_next(iterator)) {
+    location_t *location = ioopm_iterator_next(iterator).any;
+    if (strcmp(location->shelf, shelf) == 0) {
+      location->quantity++;
+      free(iterator);
+      return true;
+    }
+  }
+  free(iterator);
+
+  if (is_shelf_taken(store, shelf)) {
+    return false;
+  };
+
+  location_t *new_location = calloc(1, sizeof(location_t));
+  new_location->shelf = strdup(shelf);
+  new_location->quantity = 1;
+
+  ioopm_linked_list_append(merch->locations, p_elem(new_location));
+  return true;
 }
 
 // TODO

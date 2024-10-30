@@ -181,29 +181,27 @@ void show_stock(ioopm_hash_table_t *store)
   ioopm_list_iterator_t *iterator = ioopm_list_iterator(merch->locations);
   while (ioopm_iterator_has_next(iterator)) {
     location_t *location = ioopm_iterator_next(iterator).any;
-    printf("Shelf %s: %3d items\n", location->shelf, location->quantity);
+    printf("%s: %3d items\n", location->shelf, location->quantity);
   }
+  free(iterator);
 }
 
 void replenish_stock(ioopm_hash_table_t *store)
 {
   merch_t *merch = ask_question_merch(store, "\nInput merch name: ");
-  char *shelf = ask_question_shelf("\nInput shelf: ");
+  char *shelf;
 
-  ioopm_list_iterator_t *iterator = ioopm_list_iterator(merch->locations);
-  while (ioopm_iterator_has_next(iterator)) {
-    location_t *location = ioopm_iterator_next(iterator).any;
-    if (strcmp(location->shelf, shelf) == 0) {
-      location->quantity++;
-      return;
+  while (true) {
+    shelf = ask_question_shelf("\nInput shelf: ");
+
+    bool success = increase_stock(store, merch->namn, shelf);
+    free(shelf);
+    if (success) {
+      break;
+    } else {
+      printf("Shelf is taken by another item.");
     }
-  }
-
-  location_t *new_location = calloc(1, sizeof(location_t));
-  new_location->shelf = shelf;
-  new_location->quantity = 1;
-
-  ioopm_linked_list_append(merch->locations, p_elem(new_location));
+  };
 }
 
 void print_menu()

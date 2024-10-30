@@ -120,6 +120,66 @@ void test_edit_merch()
   destroy_store(store);
 }
 
+void test_increase_stock()
+{
+  ioopm_hash_table_t *store =
+      ioopm_hash_table_create(ioopm_string_sum_hash, ioopm_str_eq_function);
+
+  char *test_name = "alvin";
+
+  add_item_to_db(store, test_name, "test description", 100);
+
+  increase_stock(store, test_name, "A01");
+
+  merch_t *merch = ioopm_hash_table_lookup(store, str_elem(test_name))->any;
+  location_t *a01 = ioopm_linked_list_get(merch->locations, 0).any;
+
+  CU_ASSERT_PTR_NOT_NULL(a01);
+  CU_ASSERT_STRING_EQUAL(a01->shelf, "A01");
+  CU_ASSERT_EQUAL(a01->quantity, 1);
+
+  increase_stock(store, test_name, "A01");
+
+  CU_ASSERT_EQUAL(a01->quantity, 2);
+
+  increase_stock(store, test_name, "B02");
+
+  location_t *b02 = ioopm_linked_list_get(merch->locations, 1).any;
+  CU_ASSERT_PTR_NOT_NULL(b02);
+  CU_ASSERT_STRING_EQUAL(b02->shelf, "B02");
+  CU_ASSERT_EQUAL(b02->quantity, 1);
+
+  increase_stock(store, test_name, "B02");
+
+  CU_ASSERT_EQUAL(a01->quantity, 2);
+
+  destroy_store(store);
+}
+
+void test_increase_stock_taken_shelf()
+{
+  ioopm_hash_table_t *store =
+      ioopm_hash_table_create(ioopm_string_sum_hash, ioopm_str_eq_function);
+
+  add_item_to_db(store, "alvin", "test description", 100);
+  add_item_to_db(store, "max", "test description", 100);
+
+  increase_stock(store, "alvin", "A01");
+
+  merch_t *merch = ioopm_hash_table_lookup(store, str_elem("alvin"))->any;
+  location_t *a01 = ioopm_linked_list_get(merch->locations, 0).any;
+
+  CU_ASSERT_PTR_NOT_NULL(a01);
+  CU_ASSERT_STRING_EQUAL(a01->shelf, "A01");
+  CU_ASSERT_EQUAL(a01->quantity, 1);
+
+  CU_ASSERT_FALSE(increase_stock(store, "max", "invalid shelf"))
+  CU_ASSERT_FALSE(increase_stock(store, "item not in store", "A01"))
+  CU_ASSERT_FALSE(increase_stock(store, "max", "A01"))
+
+  destroy_store(store);
+}
+
 int main()
 {
   // First we try to set up CUnit, and exit if we fail
@@ -146,6 +206,8 @@ int main()
       (CU_add_test(my_test_suite, "add_item_to_db test", test_add_merch) ==
        NULL) ||
       (CU_add_test(my_test_suite, "edit_merch test", test_edit_merch) ==
+       NULL) ||
+      (CU_add_test(my_test_suite, "Increase stock", test_increase_stock) ==
        NULL) ||
       0) {
     // If adding any of the tests fails, we tear down CUnit and exit

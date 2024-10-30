@@ -16,6 +16,10 @@ void destroy_store(ioopm_hash_table_t *store);
 void add_item_to_db(ioopm_hash_table_t *store, char *name, char *description,
                     int price);
 
+bool is_shelf_taken(ioopm_hash_table_t *store, char *shelf);
+
+bool increase_stock(ioopm_hash_table_t *store, char *merch_name, char *shelf);
+
 void create_cart(ioopm_hash_table_t *cart_storage);
 
 void remove_cart(ioopm_hash_table_t *cart_storage);
