@@ -233,6 +233,8 @@ void test_get_total_stock()
   total_stock = get_total_stock(store, item_name);
 
   CU_ASSERT_EQUAL(total_stock, 9);
+
+  destroy_store(store);
 }
 
 void test_add_to_cart()
@@ -264,6 +266,10 @@ void test_add_to_cart()
 
   CU_ASSERT_EQUAL(ioopm_hash_table_lookup(cart->items, str_elem(item_name))->i,
                   3);
+
+  destroy_cart(cart);
+  ioopm_hash_table_destroy(carts);
+  destroy_store(store);
 }
 
 int main()
