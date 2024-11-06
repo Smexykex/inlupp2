@@ -129,7 +129,7 @@ void test_increase_stock()
 
   add_item_to_db(store, test_name, "test description", 100);
 
-  increase_stock(store, test_name, "A01");
+  increase_stock(store, test_name, "A01", 1);
 
   merch_t *merch = ioopm_hash_table_lookup(store, str_elem(test_name))->any;
   location_t *a01 = ioopm_linked_list_get(merch->locations, 0).any;
@@ -138,18 +138,18 @@ void test_increase_stock()
   CU_ASSERT_STRING_EQUAL(a01->shelf, "A01");
   CU_ASSERT_EQUAL(a01->quantity, 1);
 
-  increase_stock(store, test_name, "A01");
+  increase_stock(store, test_name, "A01", 1);
 
   CU_ASSERT_EQUAL(a01->quantity, 2);
 
-  increase_stock(store, test_name, "B02");
+  increase_stock(store, test_name, "B02", 1);
 
   location_t *b02 = ioopm_linked_list_get(merch->locations, 1).any;
   CU_ASSERT_PTR_NOT_NULL(b02);
   CU_ASSERT_STRING_EQUAL(b02->shelf, "B02");
   CU_ASSERT_EQUAL(b02->quantity, 1);
 
-  increase_stock(store, test_name, "B02");
+  increase_stock(store, test_name, "B02", 1);
 
   CU_ASSERT_EQUAL(a01->quantity, 2);
 
@@ -164,7 +164,7 @@ void test_increase_stock_taken_shelf()
   add_item_to_db(store, "alvin", "test description", 100);
   add_item_to_db(store, "max", "test description", 100);
 
-  increase_stock(store, "alvin", "A01");
+  increase_stock(store, "alvin", "A01", 1);
 
   merch_t *merch = ioopm_hash_table_lookup(store, str_elem("alvin"))->any;
   location_t *a01 = ioopm_linked_list_get(merch->locations, 0).any;
@@ -173,9 +173,39 @@ void test_increase_stock_taken_shelf()
   CU_ASSERT_STRING_EQUAL(a01->shelf, "A01");
   CU_ASSERT_EQUAL(a01->quantity, 1);
 
-  CU_ASSERT_FALSE(increase_stock(store, "max", "invalid shelf"))
-  CU_ASSERT_FALSE(increase_stock(store, "item not in store", "A01"))
-  CU_ASSERT_FALSE(increase_stock(store, "max", "A01"))
+  CU_ASSERT_FALSE(increase_stock(store, "max", "invalid shelf", 1))
+  CU_ASSERT_FALSE(increase_stock(store, "item not in store", "A01", 1))
+  CU_ASSERT_FALSE(increase_stock(store, "max", "A01", 1))
+
+  destroy_store(store);
+}
+
+void test_increase_stock_different_quantities()
+{
+  ioopm_hash_table_t *store =
+      ioopm_hash_table_create(ioopm_string_sum_hash, ioopm_str_eq_function);
+
+  add_item_to_db(store, "alvin", "test description", 100);
+
+  increase_stock(store, "alvin", "A01", 1);
+  increase_stock(store, "alvin", "A02", 15);
+
+  merch_t *merch = ioopm_hash_table_lookup(store, str_elem("alvin"))->any;
+  location_t *a01 = ioopm_linked_list_get(merch->locations, 0).any;
+  location_t *a02 = ioopm_linked_list_get(merch->locations, 1).any;
+
+  CU_ASSERT_PTR_NOT_NULL(a01);
+  CU_ASSERT_EQUAL(a01->quantity, 1);
+
+  CU_ASSERT_PTR_NOT_NULL(a02);
+  CU_ASSERT_EQUAL(a02->quantity, 15);
+
+  increase_stock(store, "alvin", "A01", 5);
+  CU_ASSERT_EQUAL(a01->quantity, 6);
+
+  // Negative numbers subtract, behaviour may be changed in future
+  increase_stock(store, "alvin", "A02", -5);
+  CU_ASSERT_EQUAL(a02->quantity, 10);
 
   destroy_store(store);
 }

@@ -109,11 +109,14 @@ bool is_shelf_taken(ioopm_hash_table_t *store, char *shelf)
   return false;
 }
 
-bool increase_stock(ioopm_hash_table_t *store, char *merch_name, char *shelf)
+// Negative quantities will subtract and possibly make quantity negative.
+bool increase_stock(ioopm_hash_table_t *store, char *merch_name, char *shelf,
+                    int add_quantity)
 {
   if (!is_valid_shelf(shelf)) {
     return false;
   }
+
   merch_t *merch = ioopm_hash_table_lookup(store, str_elem(merch_name))->any;
   if (merch == NULL) {
     return false;
@@ -122,7 +125,7 @@ bool increase_stock(ioopm_hash_table_t *store, char *merch_name, char *shelf)
   while (ioopm_iterator_has_next(iterator)) {
     location_t *location = ioopm_iterator_next(iterator).any;
     if (strcmp(location->shelf, shelf) == 0) {
-      location->quantity++;
+      location->quantity += add_quantity;
       free(iterator);
       return true;
     }

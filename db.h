@@ -18,7 +18,8 @@ void add_item_to_db(ioopm_hash_table_t *store, char *name, char *description,
 
 bool is_shelf_taken(ioopm_hash_table_t *store, char *shelf);
 
-bool increase_stock(ioopm_hash_table_t *store, char *merch_name, char *shelf);
+bool increase_stock(ioopm_hash_table_t *store, char *merch_name, char *shelf,
+                    int add_quantity);
 
 void create_cart(ioopm_hash_table_t *cart_storage);
 

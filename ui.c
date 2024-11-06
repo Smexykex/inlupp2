@@ -190,11 +190,13 @@ void replenish_stock(ioopm_hash_table_t *store)
 {
   merch_t *merch = ask_question_merch(store, "\nInput merch name: ");
   char *shelf;
+  int quantity;
 
   while (true) {
     shelf = ask_question_shelf("\nInput shelf: ");
+    quantity = ask_question_int("\nInput quantity to add: ");
 
-    bool success = increase_stock(store, merch->namn, shelf);
+    bool success = increase_stock(store, merch->namn, shelf, quantity);
     free(shelf);
     if (success) {
       break;
