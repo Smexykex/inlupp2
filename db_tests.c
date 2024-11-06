@@ -210,6 +210,54 @@ void test_increase_stock_different_quantities()
   destroy_store(store);
 }
 
+void test_get_total_stock()
+{
+  ioopm_hash_table_t *store =
+      ioopm_hash_table_create(ioopm_string_sum_hash, ioopm_str_eq_function);
+  void *carts;
+
+  char *item_name = "pen";
+  add_item_to_db(store, item_name, "test", 100);
+  size_t total_stock = get_total_stock(carts, item_name);
+
+  CU_ASSERT_EQUAL(total_stock, 0);
+
+  replenish_stock(item_name, 4);
+  size_t total_stock = get_total_stock(carts, item_name);
+
+  CU_ASSERT_EQUAL(total_stock, 4);
+
+  char *new_item = "stick";
+  add_item_to_db(store, new_item, "test", 100);
+  replenish_stock(item_name, 5);
+
+  CU_ASSERT_EQUAL(total_stock, 9);
+}
+
+void test_add_to_cart()
+{
+  ioopm_hash_table_t *store =
+      ioopm_hash_table_create(ioopm_string_sum_hash, ioopm_str_eq_function);
+
+  void *cart_storage;
+
+  char *item_name = "pen";
+  add_item_to_db(store, item_name, "test", 100);
+  replenish_stock(item_name, 4);
+
+  cart_t cart = create_cart(1);
+  add_to_cart(cart, item_name, 2);
+
+  int total_merch_in_carts = get_total_stock(cart_storage, item_name);
+  int total_merch_in_store;
+  CU_ASSERT_EQUAL(total_merch_in_carts, 2);
+
+  add_to_cart(cart, item_name, 5);
+  total_merch_in_carts = get_total_stock(cart_storage, item_name);
+
+  CU_ASSERT_EQUAL(total_merch_in_carts, 2);
+}
+
 int main()
 {
   // First we try to set up CUnit, and exit if we fail
