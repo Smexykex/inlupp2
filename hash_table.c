@@ -11,7 +11,7 @@ struct ioopm_hash_table {
   // ie first entry is found at buckets[i].next
 };
 
-static bool int_eq(elem_t a, elem_t b) { return a.int_num == b.int_num; }
+static bool int_eq(elem_t a, elem_t b) { return a.i == b.i; }
 
 ioopm_hash_table_t *ioopm_hash_table_create(ioopm_hash_function *hash_function,
                                             ioopm_eq_function *key_equals)
@@ -30,7 +30,7 @@ static int find_bucket(ioopm_hash_table_t *ht, elem_t key)
 {
   if (ht->hash_function == NULL) {
     // treat keys as integers
-    return abs(key.int_num % NUM_BUCKETS);
+    return abs(key.i % NUM_BUCKETS);
   } else {
     return abs(ht->hash_function(key) % NUM_BUCKETS);
   }

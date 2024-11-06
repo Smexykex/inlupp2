@@ -23,21 +23,21 @@ int clean_suite(void)
 void test_input_merch()
 {
   ioopm_hash_table_t *merch_data_base =
-      ioopm_hash_table_create(ioopm_string_sum_hash, ioopm_str_eq_function);
+      ioopm_hash_table_create(string_sum_hash, str_eq_function);
 
   input_merch(merch_data_base);
 
-  elem_t merch_key = {.str = "max"};
+  elem_t merch_key = {.s = "max"};
   elem_t *added_item = ioopm_hash_table_lookup(merch_data_base, merch_key);
 
   if (added_item == NULL) {
     CU_ASSERT(false);
   } else {
-    merch_t *added_merch = added_item->any;
+    merch_t *added_merch = added_item->p;
 
-    CU_ASSERT_STRING_EQUAL(added_merch->namn, "max");
-    CU_ASSERT_STRING_EQUAL(added_merch->beskrivning, "test description");
-    CU_ASSERT_EQUAL(added_merch->pris, 100);
+    CU_ASSERT_STRING_EQUAL(added_merch->name, "max");
+    CU_ASSERT_STRING_EQUAL(added_merch->description, "test description");
+    CU_ASSERT_EQUAL(added_merch->price, 100);
     CU_ASSERT_PTR_NOT_NULL(added_merch->locations);
   }
 
@@ -47,7 +47,7 @@ void test_input_merch()
 void test_remove_item()
 {
   ioopm_hash_table_t *merch_data_base =
-      ioopm_hash_table_create(ioopm_string_sum_hash, ioopm_str_eq_function);
+      ioopm_hash_table_create(string_sum_hash, str_eq_function);
 
   add_item_to_db(merch_data_base, "alvin", "test", 100);
   add_item_to_db(merch_data_base, "max", "test", 100);
@@ -55,7 +55,7 @@ void test_remove_item()
   remove_item_from_db(merch_data_base);
 
   CU_ASSERT_EQUAL(ioopm_hash_table_size(merch_data_base), 1);
-  CU_ASSERT_FALSE(ioopm_hash_table_has_key(merch_data_base, str_elem("alvin")));
+  CU_ASSERT_FALSE(ioopm_hash_table_has_key(merch_data_base, s_elem("alvin")));
 
   destroy_store(merch_data_base);
 }
@@ -63,7 +63,7 @@ void test_remove_item()
 void test_edit_item()
 {
   ioopm_hash_table_t *store =
-      ioopm_hash_table_create(ioopm_string_sum_hash, ioopm_str_eq_function);
+      ioopm_hash_table_create(string_sum_hash, str_eq_function);
 
   // input_merch(store);
   // input_merch(store);
@@ -72,15 +72,14 @@ void test_edit_item()
 
   edit_db(store);
 
-  CU_ASSERT_PTR_NULL(ioopm_hash_table_lookup(store, str_elem("alvin")));
+  CU_ASSERT_PTR_NULL(ioopm_hash_table_lookup(store, s_elem("alvin")));
 
-  merch_t *item =
-      (merch_t *)ioopm_hash_table_lookup(store, str_elem("max"))->any;
+  merch_t *item = (merch_t *)ioopm_hash_table_lookup(store, s_elem("max"))->p;
 
   CU_ASSERT_PTR_NOT_NULL(item);
-  CU_ASSERT_STRING_EQUAL(item->namn, "max");
-  CU_ASSERT_STRING_EQUAL(item->beskrivning, "test3");
-  CU_ASSERT_EQUAL(item->pris, 200);
+  CU_ASSERT_STRING_EQUAL(item->name, "max");
+  CU_ASSERT_STRING_EQUAL(item->description, "test3");
+  CU_ASSERT_EQUAL(item->price, 200);
 
   destroy_store(store);
 }
@@ -88,15 +87,15 @@ void test_edit_item()
 void test_replenish_stock()
 {
   ioopm_hash_table_t *store =
-      ioopm_hash_table_create(ioopm_string_sum_hash, ioopm_str_eq_function);
+      ioopm_hash_table_create(string_sum_hash, str_eq_function);
 
   add_item_to_db(store, "alvin", "test description", 100);
 
   // Add location A01
   replenish_stock(store);
-  merch_t *merch = ioopm_hash_table_lookup(store, str_elem("alvin"))->any;
+  merch_t *merch = ioopm_hash_table_lookup(store, s_elem("alvin"))->p;
 
-  location_t *a01 = ioopm_linked_list_get(merch->locations, 0).any;
+  location_t *a01 = ioopm_linked_list_get(merch->locations, 0).p;
   CU_ASSERT_PTR_NOT_NULL(a01);
   CU_ASSERT_STRING_EQUAL(a01->shelf, "A01");
   CU_ASSERT_EQUAL(a01->quantity, 1);
@@ -109,7 +108,7 @@ void test_replenish_stock()
   // Not existing location B02, should add new location
   replenish_stock(store);
 
-  location_t *b02 = ioopm_linked_list_get(merch->locations, 1).any;
+  location_t *b02 = ioopm_linked_list_get(merch->locations, 1).p;
   CU_ASSERT_PTR_NOT_NULL(b02);
   CU_ASSERT_STRING_EQUAL(b02->shelf, "B02");
   CU_ASSERT_EQUAL(b02->quantity, 1);

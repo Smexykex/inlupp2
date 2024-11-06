@@ -7,28 +7,22 @@ typedef union elem elem_t;
 union elem {
   int i;
   unsigned int u;
-  bool boolean;
-  float float_num;
-  void *any;
-  char *str;
+  bool b;
+  float f;
+  void *p;
+  char *s;
 };
 
-// should make consistent (either str_elem and ptr_elem or s_elem and p_elem)
-#define str_elem(x)                                                            \
-  (elem_t) { .str = x }
+#define s_elem(x)                                                              \
+  (elem_t) { .s = x }
 #define p_elem(x)                                                              \
-  (elem_t) { .any = x }
+  (elem_t) { .p = x }
 #define i_elem(x)                                                              \
   (elem_t) { .i = x }
 #define u_elem(x)                                                              \
   (elem_t) { .u = x }
 
 typedef bool ioopm_eq_function(elem_t a, elem_t b);
-
-bool ioopm_int_eq_function(elem_t a, elem_t b);
-bool ioopm_float_eq_function(elem_t a, elem_t b);
-bool ioopm_bool_eq_function(elem_t a, elem_t b);
-bool ioopm_str_eq_function(elem_t a, elem_t b);
 
 // an entry in a linked list
 typedef struct list_entry list_entry_t;
@@ -53,9 +47,9 @@ typedef struct ioopm_list_iterator {
 
 typedef struct merch merch_t;
 struct merch {
-  char *namn;
-  char *beskrivning;
-  int pris;
+  char *name;
+  char *description;
+  int price;
   ioopm_list_t *locations;
 };
 
@@ -68,13 +62,15 @@ struct location {
 typedef bool ioopm_predicate(elem_t key, elem_t value, void *extra);
 typedef void ioopm_apply_function(elem_t key, elem_t *value, void *extra);
 
-bool is_valid_shelf(char *shelf);
-
-bool shelf_equals(elem_t element_1, elem_t element_2);
-
-merch_t *create_merch(char *namn, char *beskrivning, int pris,
-                      ioopm_list_t *locations);
+bool int_eq_function(elem_t a, elem_t b);
+bool float_eq_function(elem_t a, elem_t b);
+bool bool_eq_function(elem_t a, elem_t b);
+bool str_eq_function(elem_t a, elem_t b);
 
 int hash_function_void(elem_t element);
 
-int ioopm_string_sum_hash(const elem_t key1);
+int string_sum_hash(const elem_t key1);
+
+bool is_valid_shelf(char *shelf);
+
+bool shelf_equals(elem_t element_1, elem_t element_2);

@@ -22,7 +22,7 @@ static merch_t *ask_question_merch(ioopm_hash_table_t *store, char *question)
 
   do {
     name = ask_question_string(question);
-    merch = ioopm_hash_table_lookup(store, str_elem(name))->any;
+    merch = ioopm_hash_table_lookup(store, s_elem(name))->p;
     free(name);
   } while (merch == NULL);
   return merch;
@@ -45,9 +45,9 @@ static char *ask_question_shelf(char *question)
 
 void input_merch(ioopm_hash_table_t *store)
 {
-  char *name = ask_question_string("\nNamn: ");
-  char *description = ask_question_string("Beskrivning: ");
-  int price = ask_question_int("Pris: ");
+  char *name = ask_question_string("\nname: ");
+  char *description = ask_question_string("description: ");
+  int price = ask_question_int("price: ");
 
   add_item_to_db(store, name, description, price);
   free(name);
@@ -56,15 +56,15 @@ void input_merch(ioopm_hash_table_t *store)
 
 void print_item(merch_t *vara)
 {
-  printf("Name:  %10s | Desc:  %20s | Price: %d.%d SEK\n", vara->namn,
-         vara->beskrivning, (vara->pris) / 100, (vara->pris) % 100);
+  printf("Name:  %10s | Desc:  %20s | Price: %d.%d SEK\n", vara->name,
+         vara->description, (vara->price) / 100, (vara->price) % 100);
 }
 
 void print_line() { puts("--------------------------------"); }
 
 static int cmpstringp(const void *p1, const void *p2)
 {
-  return strcmp((*(merch_t *const *)p1)->namn, (*(merch_t *const *)p2)->namn);
+  return strcmp((*(merch_t *const *)p1)->name, (*(merch_t *const *)p2)->name);
 }
 
 bool stop_listing(int current_item)
@@ -117,16 +117,16 @@ void remove_item_from_db(ioopm_hash_table_t *merch_data_base)
   do {
     merch_name = ask_question_string("\nInput merch name: ");
     retrived_value =
-        ioopm_hash_table_lookup(merch_data_base, str_elem(merch_name));
+        ioopm_hash_table_lookup(merch_data_base, s_elem(merch_name));
   } while (retrived_value == NULL);
 
   char *confirmation =
       ask_question_string("Do you want delete?, type 'y' for yes ");
 
   if (tolower(confirmation[0]) == 'y') {
-    merch_t *retrived_merch = retrived_value->any;
+    merch_t *retrived_merch = retrived_value->p;
 
-    ioopm_hash_table_remove(merch_data_base, str_elem(merch_name));
+    ioopm_hash_table_remove(merch_data_base, s_elem(merch_name));
     destroy_merch(retrived_merch);
   }
 
@@ -144,19 +144,19 @@ void edit_db(ioopm_hash_table_t *store)
   do {
     name_to_edit = ask_question_string("\nInput merch name to edit: ");
     printf("%s\n", name_to_edit);
-    item = ioopm_hash_table_lookup(store, str_elem(name_to_edit));
+    item = ioopm_hash_table_lookup(store, s_elem(name_to_edit));
 
     free(name_to_edit);
   } while (item == NULL);
 
-  merch_to_edit = (merch_t *)item->any;
+  merch_to_edit = (merch_t *)item->p;
   print_item(merch_to_edit);
 
   char *name;
 
   while (true) {
     name = ask_question_string("Input new name: ");
-    if (ioopm_hash_table_lookup(store, str_elem(name)) == NULL) {
+    if (ioopm_hash_table_lookup(store, s_elem(name)) == NULL) {
       break;
     }
 
@@ -167,8 +167,8 @@ void edit_db(ioopm_hash_table_t *store)
   int price = ask_question_int("Input new price: ");
 
   edit_merch(
-      store, merch_to_edit->namn,
-      (merch_t){.namn = name, .beskrivning = description, .pris = price});
+      store, merch_to_edit->name,
+      (merch_t){.name = name, .description = description, .price = price});
 
   free(name);
   free(description);
@@ -180,7 +180,7 @@ void show_stock(ioopm_hash_table_t *store)
 
   ioopm_list_iterator_t *iterator = ioopm_list_iterator(merch->locations);
   while (ioopm_iterator_has_next(iterator)) {
-    location_t *location = ioopm_iterator_next(iterator).any;
+    location_t *location = ioopm_iterator_next(iterator).p;
     printf("%s: %3d items\n", location->shelf, (int)location->quantity);
   }
   free(iterator);
@@ -196,7 +196,7 @@ void replenish_stock(ioopm_hash_table_t *store)
     shelf = ask_question_shelf("\nInput shelf: ");
     quantity = ask_question_int("\nInput quantity to add: ");
 
-    bool success = increase_stock(store, merch->namn, shelf, quantity);
+    bool success = increase_stock(store, merch->name, shelf, quantity);
     free(shelf);
     if (success) {
       break;
@@ -217,7 +217,7 @@ void remove_cart(ioopm_hash_table_t *cart_storage)
   elem_t *lookup = ioopm_hash_table_lookup(cart_storage, i_elem(id));
 
   if (lookup != NULL) {
-    cart_t *cart_to_remove = lookup->any;
+    cart_t *cart_to_remove = lookup->p;
 
     char *confirmation =
         ask_question_string("Are you sure you want to remove? ");
@@ -295,7 +295,7 @@ void event_loop()
 {
   // Change hash function?
   ioopm_hash_table_t *merch_data_base =
-      ioopm_hash_table_create(hash_function_void, ioopm_str_eq_function);
+      ioopm_hash_table_create(hash_function_void, str_eq_function);
 
   ioopm_hash_table_t *cart_storage = ioopm_hash_table_create(NULL, NULL);
   char answer;

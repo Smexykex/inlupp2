@@ -11,7 +11,7 @@ struct cart {
   ioopm_hash_table_t *items; // key: char *item_name, value: size_t quantity
 };
 
-merch_t *create_merch(char *namn, char *beskrivning, int pris,
+merch_t *create_merch(char *name, char *description, int price,
                       ioopm_list_t *locations);
 
 void edit_merch(ioopm_hash_table_t *store, char *name, merch_t new_value);
