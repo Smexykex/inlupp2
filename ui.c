@@ -206,13 +206,29 @@ void replenish_stock(ioopm_hash_table_t *store)
   };
 }
 
-// TODO
-void new_cart()
-{ // TODO
+void new_cart(ioopm_hash_table_t *cart_storage, int id)
+{
+  ioopm_hash_table_insert(cart_storage, i_elem(id), p_elem(create_cart(id)));
 }
 
-// TODO
-void remove_cart() {}
+void remove_cart(ioopm_hash_table_t *cart_storage)
+{
+  int id = ask_question_int("Cart ID to remove: ");
+  elem_t *lookup = ioopm_hash_table_lookup(cart_storage, i_elem(id));
+
+  if (lookup != NULL) {
+    cart_t *cart_to_remove = lookup->any;
+
+    char *confirmation =
+        ask_question_string("Are you sure you want to remove? ");
+    if (confirmation[0] == 'y' || confirmation[0] == 'Y') {
+      destroy_cart(cart_to_remove);
+      ioopm_hash_table_remove(cart_storage, i_elem(id));
+    }
+
+    free(confirmation);
+  }
+}
 
 // TODO
 void cart_add() {}
@@ -280,8 +296,10 @@ void event_loop()
   // Change hash function?
   ioopm_hash_table_t *merch_data_base =
       ioopm_hash_table_create(hash_function_void, ioopm_str_eq_function);
+
+  ioopm_hash_table_t *cart_storage = ioopm_hash_table_create(NULL, NULL);
   char answer;
-  void *cart_storage = NULL;
+  int cart_id_next = 0;
 
   do {
     answer = ask_question_menu();
@@ -309,10 +327,11 @@ void event_loop()
         replenish_stock(merch_data_base);
         break;
       case 'C':
-        new_cart();
+        new_cart(cart_storage, cart_id_next);
+        cart_id_next++;
         break;
       case 'R':
-        remove_cart();
+        remove_cart(cart_storage);
         break;
       case '+':
         cart_add();
