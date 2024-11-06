@@ -27,12 +27,9 @@ bool shelf_equals(elem_t element_1, elem_t element_2)
   return strcmp(shelf_1.shelf, shelf_2.shelf) == 0;
 }
 
-int hash_function_void(elem_t element) { return element.int_num; }
+int hash_function_void(elem_t element) { return element.i; }
 
-bool ioopm_int_eq_function(elem_t a, elem_t b)
-{
-  return a.int_num == b.int_num;
-}
+bool ioopm_int_eq_function(elem_t a, elem_t b) { return a.i == b.i; }
 
 bool ioopm_bool_eq_function(elem_t a, elem_t b)
 {

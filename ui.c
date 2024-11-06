@@ -181,7 +181,7 @@ void show_stock(ioopm_hash_table_t *store)
   ioopm_list_iterator_t *iterator = ioopm_list_iterator(merch->locations);
   while (ioopm_iterator_has_next(iterator)) {
     location_t *location = ioopm_iterator_next(iterator).any;
-    printf("%s: %3d items\n", location->shelf, location->quantity);
+    printf("%s: %3d items\n", location->shelf, (int)location->quantity);
   }
   free(iterator);
 }
@@ -205,6 +205,29 @@ void replenish_stock(ioopm_hash_table_t *store)
     }
   };
 }
+
+// TODO
+void new_cart()
+{ // TODO
+}
+
+// TODO
+void remove_cart() {}
+
+// TODO
+void cart_add() {}
+
+// TODO
+void cart_remove() {}
+
+// TODO
+void calculate_cost() {}
+
+// TODO
+void checkout() {}
+
+// TODO
+void confirm_quit() {}
 
 void print_menu()
 {
@@ -286,27 +309,30 @@ void event_loop()
         replenish_stock(merch_data_base);
         break;
       case 'C':
-        create_cart(cart_storage);
+        new_cart();
         break;
       case 'R':
-        remove_cart(cart_storage);
+        remove_cart();
         break;
       case '+':
-        add_to_cart(cart_storage);
+        cart_add();
         break;
       case '-':
-        remove_from_cart(cart_storage);
+        cart_remove();
         break;
       case '=':
-        calculate_cost(cart_storage);
+        calculate_cost();
         break;
       case 'O':
-        checkout(cart_storage);
+        checkout();
+        break;
+      case 'Q':
+        confirm_quit();
         break;
       default:
         break;
     }
-  } while (answer != 'Q');
+  } while (true);
 
   destroy_store(merch_data_base);
 }

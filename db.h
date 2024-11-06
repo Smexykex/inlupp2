@@ -4,6 +4,13 @@
 #include "hash_table.h"
 #include <stdbool.h>
 
+typedef struct cart cart_t;
+
+struct cart {
+  size_t id;
+  ioopm_hash_table_t *items; // key: char *item_name, value: size_t quantity
+};
+
 merch_t *create_merch(char *namn, char *beskrivning, int pris,
                       ioopm_list_t *locations);
 
@@ -19,16 +26,13 @@ void add_item_to_db(ioopm_hash_table_t *store, char *name, char *description,
 bool is_shelf_taken(ioopm_hash_table_t *store, char *shelf);
 
 bool increase_stock(ioopm_hash_table_t *store, char *merch_name, char *shelf,
-                    int add_quantity);
+                    size_t add_quantity);
 
-void create_cart(ioopm_hash_table_t *cart_storage);
+size_t get_total_stock(ioopm_hash_table_t *store, char *item_name);
 
-void remove_cart(ioopm_hash_table_t *cart_storage);
+cart_t *create_cart(size_t id);
 
-void add_to_cart(ioopm_hash_table_t *cart_storage);
+void destroy_cart(cart_t *cart);
 
-void remove_from_cart(ioopm_hash_table_t *cart_storage);
-
-int calculate_cost(ioopm_hash_table_t *cart_storage);
-
-void checkout(ioopm_hash_table_t *cart_storage);
+bool add_to_cart(ioopm_hash_table_t *store, ioopm_hash_table_t *carts,
+                 size_t cart_id, char *item_name, size_t quantity);

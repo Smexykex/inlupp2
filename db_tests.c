@@ -2,6 +2,7 @@
 #include "db.h"
 #include "hash_table.h"
 #include "linked_list.h"
+
 #include <CUnit/Basic.h>
 #include <CUnit/CUnit.h>
 #include <assert.h>
@@ -214,22 +215,22 @@ void test_get_total_stock()
 {
   ioopm_hash_table_t *store =
       ioopm_hash_table_create(ioopm_string_sum_hash, ioopm_str_eq_function);
-  void *carts;
 
   char *item_name = "pen";
   add_item_to_db(store, item_name, "test", 100);
-  size_t total_stock = get_total_stock(carts, item_name);
+  size_t total_stock = get_total_stock(store, item_name);
 
   CU_ASSERT_EQUAL(total_stock, 0);
 
-  replenish_stock(item_name, 4);
-  size_t total_stock = get_total_stock(carts, item_name);
+  increase_stock(store, item_name, "A1", 4);
+  total_stock = get_total_stock(store, item_name);
 
   CU_ASSERT_EQUAL(total_stock, 4);
 
   char *new_item = "stick";
   add_item_to_db(store, new_item, "test", 100);
-  replenish_stock(item_name, 5);
+  increase_stock(store, item_name, "A1", 5);
+  total_stock = get_total_stock(store, item_name);
 
   CU_ASSERT_EQUAL(total_stock, 9);
 }
@@ -239,23 +240,30 @@ void test_add_to_cart()
   ioopm_hash_table_t *store =
       ioopm_hash_table_create(ioopm_string_sum_hash, ioopm_str_eq_function);
 
-  void *cart_storage;
-
   char *item_name = "pen";
   add_item_to_db(store, item_name, "test", 100);
-  replenish_stock(item_name, 4);
+  increase_stock(store, item_name, "A1", 4);
 
-  cart_t cart = create_cart(1);
-  add_to_cart(cart, item_name, 2);
+  cart_t *cart = create_cart(1);
 
-  int total_merch_in_carts = get_total_stock(cart_storage, item_name);
-  int total_merch_in_store;
-  CU_ASSERT_EQUAL(total_merch_in_carts, 2);
+  ioopm_hash_table_t *carts = ioopm_hash_table_create(NULL, NULL);
 
-  add_to_cart(cart, item_name, 5);
-  total_merch_in_carts = get_total_stock(cart_storage, item_name);
+  ioopm_hash_table_insert(carts, i_elem(1), p_elem(cart));
 
-  CU_ASSERT_EQUAL(total_merch_in_carts, 2);
+  add_to_cart(store, carts, 1, item_name, 2);
+
+  CU_ASSERT_EQUAL(ioopm_hash_table_lookup(cart->items, str_elem(item_name))->i,
+                  2);
+
+  add_to_cart(store, carts, 1, item_name, 5);
+
+  CU_ASSERT_EQUAL(ioopm_hash_table_lookup(cart->items, str_elem(item_name))->i,
+                  2);
+
+  add_to_cart(store, carts, 1, item_name, 1);
+
+  CU_ASSERT_EQUAL(ioopm_hash_table_lookup(cart->items, str_elem(item_name))->i,
+                  3);
 }
 
 int main()
@@ -287,6 +295,13 @@ int main()
        NULL) ||
       (CU_add_test(my_test_suite, "Increase stock", test_increase_stock) ==
        NULL) ||
+      (CU_add_test(my_test_suite, "Increase stock taken shelf",
+                   test_increase_stock_taken_shelf) == NULL) ||
+      (CU_add_test(my_test_suite, "Increase stock different quantities",
+                   test_increase_stock_different_quantities) == NULL) ||
+      (CU_add_test(my_test_suite, "Get total stock", test_get_total_stock) ==
+       NULL) ||
+      (CU_add_test(my_test_suite, "add_to_cart", test_add_to_cart) == NULL) ||
       0) {
     // If adding any of the tests fails, we tear down CUnit and exit
     CU_cleanup_registry();

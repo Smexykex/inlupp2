@@ -1,4 +1,4 @@
-data_base_tests
+db_tests
 ui_tests
 
 *.dSYM

@@ -1,11 +1,12 @@
 #pragma once
 
 #include <stdbool.h>
+#include <stdlib.h>
 
 typedef union elem elem_t;
 union elem {
-  int int_num;
-  unsigned int unsigned_num;
+  int i;
+  unsigned int u;
   bool boolean;
   float float_num;
   void *any;
@@ -17,6 +18,10 @@ union elem {
   (elem_t) { .str = x }
 #define p_elem(x)                                                              \
   (elem_t) { .any = x }
+#define i_elem(x)                                                              \
+  (elem_t) { .i = x }
+#define u_elem(x)                                                              \
+  (elem_t) { .u = x }
 
 typedef bool ioopm_eq_function(elem_t a, elem_t b);
 
@@ -57,7 +62,7 @@ struct merch {
 typedef struct location location_t;
 struct location {
   char *shelf;
-  int quantity;
+  size_t quantity;
 };
 
 typedef bool ioopm_predicate(elem_t key, elem_t value, void *extra);

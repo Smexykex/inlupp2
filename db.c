@@ -109,18 +109,18 @@ bool is_shelf_taken(ioopm_hash_table_t *store, char *shelf)
   return false;
 }
 
-// Negative quantities will subtract and possibly make quantity negative.
 bool increase_stock(ioopm_hash_table_t *store, char *merch_name, char *shelf,
-                    int add_quantity)
+                    size_t add_quantity)
 {
   if (!is_valid_shelf(shelf)) {
     return false;
   }
 
-  merch_t *merch = ioopm_hash_table_lookup(store, str_elem(merch_name))->any;
-  if (merch == NULL) {
+  elem_t *lookup = ioopm_hash_table_lookup(store, str_elem(merch_name));
+  if (lookup == NULL) {
     return false;
   }
+  merch_t *merch = lookup->any;
   ioopm_list_iterator_t *iterator = ioopm_list_iterator(merch->locations);
   while (ioopm_iterator_has_next(iterator)) {
     location_t *location = ioopm_iterator_next(iterator).any;
@@ -138,45 +138,101 @@ bool increase_stock(ioopm_hash_table_t *store, char *merch_name, char *shelf,
 
   location_t *new_location = calloc(1, sizeof(location_t));
   new_location->shelf = strdup(shelf);
-  new_location->quantity = 1;
+  new_location->quantity = add_quantity;
 
   ioopm_linked_list_append(merch->locations, p_elem(new_location));
   return true;
 }
 
-// TODO
-void create_cart(ioopm_hash_table_t *cart_storage)
+cart_t *create_cart(size_t id)
 {
-  puts("Not yet implemented!");
+  cart_t *cart = calloc(1, sizeof(cart_t));
+
+  cart->id = id;
+  cart->items =
+      ioopm_hash_table_create(ioopm_string_sum_hash, ioopm_str_eq_function);
+  return cart;
+}
+
+void destroy_cart(cart_t *cart)
+{
+  ioopm_hash_table_destroy(cart->items);
+  free(cart);
+}
+
+struct name_sum {
+  char *item_name;
+  int sum;
+};
+
+void cart_quantity_sum(elem_t cart_id, elem_t *cart_elem, void *acc)
+{
+  cart_t *cart = cart_elem->any;
+  if (cart == NULL) {
+  }
+  struct name_sum *ns = acc;
+  elem_t *lookup =
+      ioopm_hash_table_lookup(cart->items, str_elem(ns->item_name));
+
+  if (lookup != NULL) {
+    ns->sum += lookup->i;
+  }
+}
+
+size_t get_total_stock(ioopm_hash_table_t *store, char *item_name)
+{
+  elem_t *lookup = ioopm_hash_table_lookup(store, str_elem(item_name));
+  if (lookup == NULL) {
+    return 0;
+  }
+
+  merch_t *item = lookup->any;
+  size_t total_stock = 0;
+
+  ioopm_list_iterator_t *iterator = ioopm_list_iterator(item->locations);
+  while (ioopm_iterator_has_next(iterator)) {
+    location_t *location = ioopm_iterator_next(iterator).any;
+    total_stock += location->quantity;
+  }
+  free(iterator);
+
+  return total_stock;
+}
+
+void increase_cart_quantity(cart_t *cart, char *item_name, size_t quantity)
+{
+  elem_t *lookup = ioopm_hash_table_lookup(cart->items, str_elem(item_name));
+  if (lookup != NULL) {
+    lookup->u += quantity;
+  } else {
+    ioopm_hash_table_insert(cart->items, str_elem(item_name), u_elem(quantity));
+  }
+}
+
+// carts: key: int id, value: cart_t cart
+bool add_to_cart(ioopm_hash_table_t *store, ioopm_hash_table_t *carts,
+                 size_t cart_id, char *item_name, size_t quantity)
+{
+  // get total stock in store
+  size_t total_stock = get_total_stock(store, item_name);
+
+  // get total already in carts
+  struct name_sum ns = {.item_name = item_name, .sum = 0};
+  ioopm_hash_table_apply_to_all(carts,
+                                (ioopm_apply_function *)cart_quantity_sum, &ns);
+  int total_in_carts = ns.sum;
+
+  if (quantity + total_in_carts > total_stock) {
+    return false;
+  } else {
+    elem_t *lookup = ioopm_hash_table_lookup(carts, u_elem(cart_id));
+    if (lookup == NULL) {
+      return false;
+    }
+    increase_cart_quantity(lookup->any, item_name, quantity);
+    return true;
+  }
 }
 
 // TODO
-void remove_cart(ioopm_hash_table_t *cart_storage)
-{
-  puts("Not yet implemented!");
-}
-
-// TODO
-void add_to_cart(ioopm_hash_table_t *cart_storage)
-{
-  puts("Not yet implemented!");
-}
-
-// TODO
-void remove_from_cart(ioopm_hash_table_t *cart_storage)
-{
-  puts("Not yet implemented!");
-}
-
-// TODO
-int calculate_cost(ioopm_hash_table_t *cart_storage)
-{
-  puts("Not yet implemented!");
-  return -1;
-}
-
-// TODO
-void checkout(ioopm_hash_table_t *cart_storage)
-{
-  puts("Not yet implemented!");
-}
+void remove_from_cart() { puts("Not yet implemented!"); }
