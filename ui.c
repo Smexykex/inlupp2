@@ -210,6 +210,7 @@ cart_t *new_cart(ioopm_hash_table_t *cart_storage, int id)
 {
   cart_t *new_cart = create_cart(id);
   ioopm_hash_table_insert(cart_storage, i_elem(id), p_elem(new_cart));
+  printf("New cart created with ID: %d", id);
   return new_cart;
 }
 
@@ -268,7 +269,7 @@ void cart_remove(ioopm_hash_table_t *store, ioopm_hash_table_t *cart_storage)
   elem_t *lookup = NULL;
 
   while (lookup == NULL) {
-    id = ask_question_int("Cart ID: ");
+    id = ask_question_int("\nCart ID: ");
     lookup = ioopm_hash_table_lookup(cart_storage, i_elem(id));
   }
 
@@ -284,8 +285,28 @@ void cart_remove(ioopm_hash_table_t *store, ioopm_hash_table_t *cart_storage)
   }
 }
 
-// TODO
-void calculate_cost() {}
+void get_cost(ioopm_hash_table_t *store, ioopm_hash_table_t *cart_storage)
+{
+  if (ioopm_hash_table_size(cart_storage) == 0) {
+    printf("No carts in storage!\n");
+    return;
+  }
+
+  size_t id;
+  elem_t *lookup = NULL;
+
+  while (lookup == NULL) {
+    id = ask_question_int("Cart ID: ");
+    lookup = ioopm_hash_table_lookup(cart_storage, i_elem(id));
+  }
+
+  cart_t *cart = lookup->p;
+
+  size_t cost = calculate_cost(store, cart);
+
+  printf("\nTotal cost for cart %zu: %zu.%zu SEK", id, (cost) / 100,
+         (cost) % 100);
+}
 
 // TODO
 void checkout() {}
@@ -388,7 +409,7 @@ void event_loop()
         cart_remove(store, cart_storage);
         break;
       case '=':
-        calculate_cost();
+        get_cost(store, cart_storage);
         break;
       case 'O':
         checkout();

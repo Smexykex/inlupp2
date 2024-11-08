@@ -232,7 +232,7 @@ bool add_to_cart(ioopm_hash_table_t *store, ioopm_hash_table_t *carts,
   }
 }
 
-bool remove_from_cart(cart_t *cart, char *name, int quantity)
+bool remove_from_cart(cart_t *cart, char *name, size_t quantity)
 {
   elem_t *lookup = ioopm_hash_table_lookup(cart->items, s_elem(name));
 
@@ -248,4 +248,21 @@ bool remove_from_cart(cart_t *cart, char *name, int quantity)
 
   lookup->u = quantity_of_item - quantity;
   return true;
+}
+
+size_t calculate_cost(ioopm_hash_table_t *store, cart_t *cart)
+{
+  char **items = &ioopm_hash_table_keys(cart->items)->s;
+  size_t *quantities = &ioopm_hash_table_values(cart->items)->u;
+  size_t size = ioopm_hash_table_size(cart->items);
+
+  size_t sum = 0;
+
+  for (size_t i = 0; i < size; i++) {
+    merch_t *merch = ioopm_hash_table_lookup(store, s_elem(items[i]))->p;
+    sum += merch->price * quantities[i];
+  }
+  free(items);
+  free(quantities);
+  return sum;
 }

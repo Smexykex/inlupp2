@@ -6,7 +6,7 @@
 typedef union elem elem_t;
 union elem {
   int i;
-  unsigned int u;
+  size_t u;
   bool b;
   float f;
   void *p;

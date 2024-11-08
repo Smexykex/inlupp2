@@ -291,6 +291,27 @@ void test_remove_from_cart()
   destroy_cart(cart1);
 }
 
+void test_calculate_cost()
+{
+  ioopm_hash_table_t *store =
+      ioopm_hash_table_create(string_sum_hash, str_eq_function);
+
+  cart_t *cart = create_cart(1);
+
+  add_item_to_db(store, "item1", "desc", 100);
+  add_item_to_db(store, "item2", "desc", 1);
+
+  CU_ASSERT_EQUAL(calculate_cost(store, cart), 0);
+
+  increase_cart_quantity(cart, "item1", 5);
+  increase_cart_quantity(cart, "item2", 6);
+
+  CU_ASSERT_EQUAL(calculate_cost(store, cart), 506);
+
+  destroy_store(store);
+  destroy_cart(cart);
+}
+
 int main()
 {
   if (CU_initialize_registry() != CUE_SUCCESS)
@@ -319,6 +340,8 @@ int main()
       (CU_add_test(my_test_suite, "Get total stock", test_get_total_stock) ==
        NULL) ||
       (CU_add_test(my_test_suite, "add_to_cart", test_add_to_cart) == NULL) ||
+      (CU_add_test(my_test_suite, "calculate_cost", test_calculate_cost) ==
+       NULL) ||
       0) {
     CU_cleanup_registry();
     return CU_get_error();

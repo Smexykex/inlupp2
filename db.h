@@ -40,4 +40,6 @@ void increase_cart_quantity(cart_t *cart, char *item_name, size_t quantity);
 bool add_to_cart(ioopm_hash_table_t *store, ioopm_hash_table_t *carts,
                  size_t cart_id, char *item_name, size_t quantity);
 
-bool remove_from_cart(cart_t *cart, char *name, int quantity);
+bool remove_from_cart(cart_t *cart, char *name, size_t quantity);
+
+size_t calculate_cost(ioopm_hash_table_t *store, cart_t *cart);
