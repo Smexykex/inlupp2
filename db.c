@@ -18,10 +18,10 @@ void destroy_location(location_t *location)
   free(location);
 }
 
-bool location_equals(elem_t element_1, elem_t element_2)
+bool location_equals(elem_t a, elem_t b)
 {
-  location_t shelf_1 = *(location_t *)element_1.p;
-  location_t shelf_2 = *(location_t *)element_2.p;
+  location_t shelf_1 = *(location_t *)a.p;
+  location_t shelf_2 = *(location_t *)b.p;
 
   return strcmp(shelf_1.shelf, shelf_2.shelf) == 0;
 }
@@ -122,14 +122,14 @@ bool is_shelf_taken(merch_table_t *store, char *shelf)
   return false;
 }
 
-bool increase_stock(merch_table_t *store, char *merch_name, char *shelf,
-                    size_t add_quantity)
+bool increase_stock(merch_table_t *store, char *item_name, char *shelf,
+                    size_t quantity)
 {
   if (!is_valid_shelf(shelf)) {
     return false;
   }
 
-  elem_t *lookup = ioopm_hash_table_lookup(store, s_elem(merch_name));
+  elem_t *lookup = ioopm_hash_table_lookup(store, s_elem(item_name));
   if (lookup == NULL) {
     return false;
   }
@@ -138,7 +138,7 @@ bool increase_stock(merch_table_t *store, char *merch_name, char *shelf,
   while (ioopm_iterator_has_next(iterator)) {
     location_t *location = ioopm_iterator_next(iterator).p;
     if (strcmp(location->shelf, shelf) == 0) {
-      location->quantity += add_quantity;
+      location->quantity += quantity;
       free(iterator);
       return true;
     }
@@ -151,7 +151,7 @@ bool increase_stock(merch_table_t *store, char *merch_name, char *shelf,
 
   location_t *new_location = calloc(1, sizeof(location_t));
   new_location->shelf = strdup(shelf);
-  new_location->quantity = add_quantity;
+  new_location->quantity = quantity;
 
   ioopm_linked_list_append(merch->locations, p_elem(new_location));
   return true;
