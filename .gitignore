@@ -1,5 +1,7 @@
 db_tests
 ui_tests
+ui
+.test_files/all_tests.txt
 
 *.dSYM
 *.out

@@ -10,6 +10,9 @@ TEST_FILES=test_files/add_test.txt \
 %.o: %.c %.h
 	$(CC) $(FLAGS) $< -c
 
+ui: ui.o db.o utils.o common.o linked_list.o iterator.o hash_table.o entry.o
+	$(CC) $(FLAGS) $^ -o $@
+
 db_tests: db_tests.c db.o ui.o utils.o common.o linked_list.o iterator.o hash_table.o entry.o
 	$(CC) $(FLAGS) $^ -lcunit -o $@
 
@@ -39,6 +42,6 @@ testuileaks: testui
 	leaks -quiet -atExit -- ./ui_tests < ./test_files/all_tests.txt
 
 clean:
-	rm *.o db_tests ui_tests
+	rm *.o db_tests ui_tests ui ./test_files/all_tests.txt
 
 .PHONY: clean testdb memtestdb memtestui
