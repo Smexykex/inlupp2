@@ -218,20 +218,20 @@ void test_get_total_stock()
       ioopm_hash_table_create(string_sum_hash, str_eq_function);
 
   char *item_name = "pen";
-  add_item_to_db(store, item_name, "test", 100);
-  size_t total_stock = get_total_stock(store, item_name);
+  merch_t *pen = add_item_to_db(store, item_name, "test", 100);
+  size_t total_stock = get_total_stock(pen);
 
   CU_ASSERT_EQUAL(total_stock, 0);
 
   increase_stock(store, item_name, "A1", 4);
-  total_stock = get_total_stock(store, item_name);
+  total_stock = get_total_stock(pen);
 
   CU_ASSERT_EQUAL(total_stock, 4);
 
   char *new_item = "stick";
   add_item_to_db(store, new_item, "test", 100);
   increase_stock(store, item_name, "A1", 5);
-  total_stock = get_total_stock(store, item_name);
+  total_stock = get_total_stock(pen);
 
   CU_ASSERT_EQUAL(total_stock, 9);
 
@@ -312,6 +312,34 @@ void test_calculate_cost()
   destroy_cart(cart);
 }
 
+void test_checkout_cart()
+{
+  ioopm_hash_table_t *store =
+      ioopm_hash_table_create(string_sum_hash, str_eq_function);
+
+  cart_t *cart = create_cart(1);
+
+  merch_t *item1 = add_item_to_db(store, "item1", "desc", 1);
+  merch_t *item2 = add_item_to_db(store, "item2", "desc", 1);
+
+  increase_stock(store, "item1", "A01", 5);
+  increase_stock(store, "item2", "B01", 2);
+  increase_stock(store, "item2", "B02", 5);
+
+  increase_cart_quantity(cart, "item1", 5);
+  increase_cart_quantity(cart, "item2", 4);
+
+  checkout_cart(store, cart);
+
+  CU_ASSERT_EQUAL(get_total_stock(item1), 0);
+  CU_ASSERT_EQUAL(ioopm_linked_list_size(item1->locations), 0);
+  CU_ASSERT_EQUAL(get_total_stock(item2), 3);
+  CU_ASSERT_EQUAL(ioopm_linked_list_size(item2->locations), 1);
+
+  destroy_store(store);
+  destroy_cart(cart);
+}
+
 int main()
 {
   if (CU_initialize_registry() != CUE_SUCCESS)
@@ -342,6 +370,9 @@ int main()
       (CU_add_test(my_test_suite, "add_to_cart", test_add_to_cart) == NULL) ||
       (CU_add_test(my_test_suite, "calculate_cost", test_calculate_cost) ==
        NULL) ||
+      (CU_add_test(my_test_suite, "checkout_cart", test_checkout_cart) ==
+       NULL) ||
+
       0) {
     CU_cleanup_registry();
     return CU_get_error();

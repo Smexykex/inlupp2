@@ -17,15 +17,15 @@
 // Asks question until a name that is in the hash table is entered.
 static merch_t *ask_question_merch(ioopm_hash_table_t *store, char *question)
 {
-  merch_t *merch;
+  elem_t *lookup;
   char *name;
 
   do {
     name = ask_question_string(question);
-    merch = ioopm_hash_table_lookup(store, s_elem(name))->p;
+    lookup = ioopm_hash_table_lookup(store, s_elem(name));
     free(name);
-  } while (merch == NULL);
-  return merch;
+  } while (lookup == NULL);
+  return lookup->p;
 }
 
 static char *ask_question_shelf(char *question)
@@ -41,6 +41,20 @@ static char *ask_question_shelf(char *question)
   // Lower case inputs are capitalised
   shelf[0] = toupper(shelf[0]);
   return shelf;
+}
+
+static cart_t *ask_question_cart(ioopm_hash_table_t *cart_storage,
+                                 char *question)
+{
+  size_t id;
+  elem_t *lookup = NULL;
+
+  while (lookup == NULL) {
+    id = ask_question_int(question);
+    lookup = ioopm_hash_table_lookup(cart_storage, i_elem(id));
+  }
+
+  return lookup->p;
 }
 
 void input_merch(ioopm_hash_table_t *store)
@@ -210,27 +224,26 @@ cart_t *new_cart(ioopm_hash_table_t *cart_storage, int id)
 {
   cart_t *new_cart = create_cart(id);
   ioopm_hash_table_insert(cart_storage, i_elem(id), p_elem(new_cart));
-  printf("New cart created with ID: %d", id);
+  printf("New cart created with ID: %d\n", id);
   return new_cart;
 }
 
 void remove_cart(ioopm_hash_table_t *cart_storage)
 {
-  int id = ask_question_int("Cart ID to remove: ");
-  elem_t *lookup = ioopm_hash_table_lookup(cart_storage, i_elem(id));
-
-  if (lookup != NULL) {
-    cart_t *cart_to_remove = lookup->p;
-
-    char *confirmation =
-        ask_question_string("Are you sure you want to remove? ");
-    if (confirmation[0] == 'y' || confirmation[0] == 'Y') {
-      destroy_cart(cart_to_remove);
-      ioopm_hash_table_remove(cart_storage, i_elem(id));
-    }
-
-    free(confirmation);
+  if (ioopm_hash_table_size(cart_storage) == 0) {
+    printf("No carts in storage!\n");
+    return;
   }
+
+  cart_t *cart = ask_question_cart(cart_storage, "\nCart ID: ");
+
+  char *confirmation = ask_question_string("Are you sure you want to remove? ");
+  if (confirmation[0] == 'y' || confirmation[0] == 'Y') {
+    destroy_cart(cart);
+    ioopm_hash_table_remove(cart_storage, i_elem(cart->id));
+  }
+
+  free(confirmation);
 }
 
 void cart_add(ioopm_hash_table_t *store, ioopm_hash_table_t *cart_storage)
@@ -240,18 +253,13 @@ void cart_add(ioopm_hash_table_t *store, ioopm_hash_table_t *cart_storage)
     return;
   }
 
-  int id;
-  elem_t *lookup = NULL;
-
-  while (lookup == NULL) {
-    id = ask_question_int("Cart ID: ");
-    lookup = ioopm_hash_table_lookup(cart_storage, i_elem(id));
-  }
+  cart_t *cart = ask_question_cart(cart_storage, "\nCart ID: ");
 
   merch_t *merch = ask_question_merch(store, "Merch to add to cart: ");
   int quantity = ask_question_int("Amount of merch: ");
 
-  bool success = add_to_cart(store, cart_storage, id, merch->name, quantity);
+  bool success =
+      add_to_cart(store, cart_storage, cart->id, merch->name, quantity);
 
   if (!success) {
     printf("Not enough in stock");
@@ -265,15 +273,7 @@ void cart_remove(ioopm_hash_table_t *store, ioopm_hash_table_t *cart_storage)
     return;
   }
 
-  int id;
-  elem_t *lookup = NULL;
-
-  while (lookup == NULL) {
-    id = ask_question_int("\nCart ID: ");
-    lookup = ioopm_hash_table_lookup(cart_storage, i_elem(id));
-  }
-
-  cart_t *cart = lookup->p;
+  cart_t *cart = ask_question_cart(cart_storage, "\nCart ID: ");
 
   merch_t *merch = ask_question_merch(store, "Merch to remove from cart: ");
   int quantity = ask_question_int("Amount of merch: ");
@@ -292,27 +292,36 @@ void get_cost(ioopm_hash_table_t *store, ioopm_hash_table_t *cart_storage)
     return;
   }
 
-  size_t id;
-  elem_t *lookup = NULL;
-
-  while (lookup == NULL) {
-    id = ask_question_int("Cart ID: ");
-    lookup = ioopm_hash_table_lookup(cart_storage, i_elem(id));
-  }
-
-  cart_t *cart = lookup->p;
+  cart_t *cart = ask_question_cart(cart_storage, "\nCart ID: ");
 
   size_t cost = calculate_cost(store, cart);
 
-  printf("\nTotal cost for cart %zu: %zu.%zu SEK", id, (cost) / 100,
+  printf("\nTotal cost for cart %zu: %zu.%2zu SEK", cart->id, (cost) / 100,
          (cost) % 100);
 }
 
-// TODO
-void checkout() {}
+void checkout(ioopm_hash_table_t *store, ioopm_hash_table_t *cart_storage)
+{
+  if (ioopm_hash_table_size(cart_storage) == 0) {
+    printf("No carts in storage!\n");
+    return;
+  }
 
-// TODO
-void confirm_quit() {}
+  cart_t *cart = ask_question_cart(cart_storage, "\nCart ID: ");
+
+  checkout_cart(store, cart);
+
+  ioopm_hash_table_remove(cart_storage, u_elem(cart->id));
+  destroy_cart(cart);
+}
+
+void confirm_quit()
+{
+  char *answer = ask_question_string("Confirm quit? (Y/n): ");
+  if (tolower(answer[0] == 'y')) {
+    exit(0);
+  };
+}
 
 void print_menu()
 {
@@ -362,18 +371,18 @@ char ask_question_menu()
 
 void event_loop()
 {
-  // Change hash function?
   ioopm_hash_table_t *store =
-      ioopm_hash_table_create(hash_function_void, str_eq_function);
+      ioopm_hash_table_create(string_sum_hash, str_eq_function);
 
   ioopm_hash_table_t *cart_storage = ioopm_hash_table_create(NULL, NULL);
   char answer;
-  int cart_id_next = 0;
+  int cart_id_next = 1;
 
   do {
     answer = ask_question_menu();
 
-    // answer should always be upper case
+    print_line();
+
     answer = toupper(answer);
 
     switch (answer) {
@@ -412,7 +421,7 @@ void event_loop()
         get_cost(store, cart_storage);
         break;
       case 'O':
-        checkout();
+        checkout(store, cart_storage);
         break;
       case 'Q':
         confirm_quit();
@@ -420,7 +429,10 @@ void event_loop()
       default:
         break;
     }
+    print_line();
   } while (true);
 
   destroy_store(store);
 }
+
+int main() { event_loop(); }

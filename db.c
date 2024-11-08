@@ -46,6 +46,12 @@ void edit_merch(ioopm_hash_table_t *store, char *name, merch_t new_value)
   ioopm_hash_table_insert(store, s_elem(item->name), p_elem(item));
 }
 
+void destroy_location(location_t *location)
+{
+  free(location->shelf);
+  free(location);
+}
+
 void destroy_merch(merch_t *merch)
 {
   free(merch->name);
@@ -54,8 +60,7 @@ void destroy_merch(merch_t *merch)
   ioopm_list_iterator_t *iterator = ioopm_list_iterator(merch->locations);
   while (ioopm_iterator_has_next(iterator)) {
     location_t *location = ioopm_iterator_next(iterator).p;
-    free(location->shelf);
-    free(location);
+    destroy_location(location);
   }
   free(iterator);
 
@@ -76,11 +81,12 @@ void destroy_store(ioopm_hash_table_t *store)
   free(items);
 }
 
-void add_item_to_db(ioopm_hash_table_t *store, char *name, char *description,
-                    int price)
+merch_t *add_item_to_db(ioopm_hash_table_t *store, char *name,
+                        char *description, int price)
 {
   merch_t *merch = create_merch(name, description, price, NULL);
   ioopm_hash_table_insert(store, s_elem(merch->name), p_elem(merch));
+  return merch;
 }
 
 bool is_shelf_taken(ioopm_hash_table_t *store, char *shelf)
@@ -177,24 +183,18 @@ void cart_quantity_sum(elem_t cart_id, elem_t *cart_elem, void *acc)
   }
 }
 
-size_t get_total_stock(ioopm_hash_table_t *store, char *item_name)
+size_t get_total_stock(merch_t *merch)
 {
-  elem_t *lookup = ioopm_hash_table_lookup(store, s_elem(item_name));
-  if (lookup == NULL) {
-    return 0;
-  }
+  size_t total = 0;
 
-  merch_t *item = lookup->p;
-  size_t total_stock = 0;
-
-  ioopm_list_iterator_t *iterator = ioopm_list_iterator(item->locations);
+  ioopm_list_iterator_t *iterator = ioopm_list_iterator(merch->locations);
   while (ioopm_iterator_has_next(iterator)) {
     location_t *location = ioopm_iterator_next(iterator).p;
-    total_stock += location->quantity;
+    total += location->quantity;
   }
   free(iterator);
 
-  return total_stock;
+  return total;
 }
 
 void increase_cart_quantity(cart_t *cart, char *item_name, size_t quantity)
@@ -211,10 +211,9 @@ void increase_cart_quantity(cart_t *cart, char *item_name, size_t quantity)
 bool add_to_cart(ioopm_hash_table_t *store, ioopm_hash_table_t *carts,
                  size_t cart_id, char *item_name, size_t quantity)
 {
-  // get total stock in store
-  size_t total_stock = get_total_stock(store, item_name);
+  size_t total_stock =
+      get_total_stock(ioopm_hash_table_lookup(store, s_elem(item_name))->p);
 
-  // get total already in carts
   struct name_sum ns = {.item_name = item_name, .sum = 0};
   ioopm_hash_table_apply_to_all(carts,
                                 (ioopm_apply_function *)cart_quantity_sum, &ns);
@@ -265,4 +264,43 @@ size_t calculate_cost(ioopm_hash_table_t *store, cart_t *cart)
   free(items);
   free(quantities);
   return sum;
+}
+
+// Attempts to clear locations until quantity is removed
+// Crashes if quantity is greater than total stock
+static void decrease_stock(merch_t *merch, size_t quantity)
+{
+  ioopm_list_iterator_t *iterator = ioopm_list_iterator(merch->locations);
+
+  while (ioopm_iterator_has_next(iterator) && quantity > 0) {
+    location_t *location = ioopm_iterator_current(iterator).p;
+
+    if (location->quantity > quantity) {
+      location->quantity -= quantity;
+      return;
+    } else {
+      quantity -= location->quantity;
+      destroy_location(location);
+      ioopm_iterator_remove(iterator);
+    }
+  }
+  free(iterator);
+
+  assert(quantity == 0);
+}
+
+void checkout_cart(ioopm_hash_table_t *store, cart_t *cart)
+{
+  char **items = &ioopm_hash_table_keys(cart->items)->s;
+  size_t *quantities = &ioopm_hash_table_values(cart->items)->u;
+  size_t size = ioopm_hash_table_size(cart->items);
+
+  size_t sum = 0;
+
+  for (size_t i = 0; i < size; i++) {
+    merch_t *merch = ioopm_hash_table_lookup(store, s_elem(items[i]))->p;
+    decrease_stock(merch, quantities[i]);
+  }
+  free(items);
+  free(quantities);
 }

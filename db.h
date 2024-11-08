@@ -17,19 +17,21 @@ merch_t *create_merch(char *name, char *description, int price,
 
 void edit_merch(ioopm_hash_table_t *store, char *name, merch_t new_value);
 
-void destroy_merch(merch_t *to_be_removed_merch);
+void destroy_location(location_t *location);
+
+void destroy_merch(merch_t *merch);
 
 void destroy_store(ioopm_hash_table_t *store);
 
-void add_item_to_db(ioopm_hash_table_t *store, char *name, char *description,
-                    int price);
+merch_t *add_item_to_db(ioopm_hash_table_t *store, char *name,
+                        char *description, int price);
 
 bool is_shelf_taken(ioopm_hash_table_t *store, char *shelf);
 
 bool increase_stock(ioopm_hash_table_t *store, char *merch_name, char *shelf,
                     size_t add_quantity);
 
-size_t get_total_stock(ioopm_hash_table_t *store, char *item_name);
+size_t get_total_stock(merch_t *merch);
 
 cart_t *create_cart(size_t id);
 
@@ -43,3 +45,5 @@ bool add_to_cart(ioopm_hash_table_t *store, ioopm_hash_table_t *carts,
 bool remove_from_cart(cart_t *cart, char *name, size_t quantity);
 
 size_t calculate_cost(ioopm_hash_table_t *store, cart_t *cart);
+
+void checkout_cart(ioopm_hash_table_t *store, cart_t *cart);
