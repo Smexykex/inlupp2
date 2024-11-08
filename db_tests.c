@@ -1,12 +1,12 @@
-#include "common.h"
-#include "db.h"
-#include "hash_table.h"
-#include "linked_list.h"
-
 #include <CUnit/Basic.h>
 #include <CUnit/CUnit.h>
 #include <assert.h>
 #include <time.h>
+
+#include "common.h"
+#include "db.h"
+#include "hash_table.h"
+#include "linked_list.h"
 
 int init_suite(void)
 {
@@ -24,42 +24,25 @@ int clean_suite(void)
 
 void test_is_valid_shelf_false()
 {
-  char *shelf1 = "aa21";
-  char *shelf2 = "2a1";
-  char *shelf3 = "21A";
-  char *shelf4 = " a12";
-  char *shelf5 = "aA12";
-  char *shelf6 = ".A12";
-  char *shelf7 = "A12 ";
-  char *shelf8 = "A2 2";
-  char *shelf9 = "a 22";
-  char *shelf10 = "a-22";
-  char *shelf11 = "a22.";
-
-  CU_ASSERT_FALSE(is_valid_shelf(shelf1));
-  CU_ASSERT_FALSE(is_valid_shelf(shelf2));
-  CU_ASSERT_FALSE(is_valid_shelf(shelf3));
-  CU_ASSERT_FALSE(is_valid_shelf(shelf4));
-  CU_ASSERT_FALSE(is_valid_shelf(shelf5));
-  CU_ASSERT_FALSE(is_valid_shelf(shelf6));
-  CU_ASSERT_FALSE(is_valid_shelf(shelf7));
-  CU_ASSERT_FALSE(is_valid_shelf(shelf8));
-  CU_ASSERT_FALSE(is_valid_shelf(shelf9));
-  CU_ASSERT_FALSE(is_valid_shelf(shelf10));
-  CU_ASSERT_FALSE(is_valid_shelf(shelf11));
+  CU_ASSERT_FALSE(is_valid_shelf("aa21"));
+  CU_ASSERT_FALSE(is_valid_shelf("2a1"));
+  CU_ASSERT_FALSE(is_valid_shelf("21A"));
+  CU_ASSERT_FALSE(is_valid_shelf(" a12"));
+  CU_ASSERT_FALSE(is_valid_shelf("aA12"));
+  CU_ASSERT_FALSE(is_valid_shelf(".A12"));
+  CU_ASSERT_FALSE(is_valid_shelf("A12 "));
+  CU_ASSERT_FALSE(is_valid_shelf("A2 2"));
+  CU_ASSERT_FALSE(is_valid_shelf("a 22"));
+  CU_ASSERT_FALSE(is_valid_shelf("a-22"));
+  CU_ASSERT_FALSE(is_valid_shelf("a22."));
 }
 
 void test_is_valid_shelf_true()
 {
-  char *shelf1 = "a01";
-  char *shelf2 = "A22";
-  char *shelf3 = "b22";
-  char *shelf4 = "z99";
-
-  CU_ASSERT(is_valid_shelf(shelf1));
-  CU_ASSERT(is_valid_shelf(shelf2));
-  CU_ASSERT(is_valid_shelf(shelf3));
-  CU_ASSERT(is_valid_shelf(shelf4));
+  CU_ASSERT(is_valid_shelf("a01"));
+  CU_ASSERT(is_valid_shelf("A22"));
+  CU_ASSERT(is_valid_shelf("b22"));
+  CU_ASSERT(is_valid_shelf("z99"));
 }
 
 void test_make_merch()
@@ -345,34 +328,30 @@ int main()
   if (CU_initialize_registry() != CUE_SUCCESS)
     return CU_get_error();
 
-  CU_pSuite my_test_suite =
+  CU_pSuite db_tests =
       CU_add_suite("Data base test suite", init_suite, clean_suite);
-  if (my_test_suite == NULL) {
+  if (db_tests == NULL) {
     CU_cleanup_registry();
     return CU_get_error();
   }
 
-  if ((CU_add_test(my_test_suite, "is_valid_shelf false",
+  if ((CU_add_test(db_tests, "is_valid_shelf false",
                    test_is_valid_shelf_false) == NULL) ||
-      (CU_add_test(my_test_suite, "is_valid_shelf true",
-                   test_is_valid_shelf_true) == NULL) ||
-      (CU_add_test(my_test_suite, "make_merch", test_make_merch) == NULL) ||
-      (CU_add_test(my_test_suite, "add_item_to_db", test_add_merch) == NULL) ||
-      (CU_add_test(my_test_suite, "edit_merch", test_edit_merch) == NULL) ||
-      (CU_add_test(my_test_suite, "Increase stock", test_increase_stock) ==
+      (CU_add_test(db_tests, "is_valid_shelf true", test_is_valid_shelf_true) ==
        NULL) ||
-      (CU_add_test(my_test_suite, "Increase stock taken shelf",
+      (CU_add_test(db_tests, "make_merch", test_make_merch) == NULL) ||
+      (CU_add_test(db_tests, "add_item_to_db", test_add_merch) == NULL) ||
+      (CU_add_test(db_tests, "edit_merch", test_edit_merch) == NULL) ||
+      (CU_add_test(db_tests, "Increase stock", test_increase_stock) == NULL) ||
+      (CU_add_test(db_tests, "Increase stock taken shelf",
                    test_increase_stock_taken_shelf) == NULL) ||
-      (CU_add_test(my_test_suite, "Increase stock different quantities",
+      (CU_add_test(db_tests, "Increase stock different quantities",
                    test_increase_stock_different_quantities) == NULL) ||
-      (CU_add_test(my_test_suite, "Get total stock", test_get_total_stock) ==
+      (CU_add_test(db_tests, "Get total stock", test_get_total_stock) ==
        NULL) ||
-      (CU_add_test(my_test_suite, "add_to_cart", test_add_to_cart) == NULL) ||
-      (CU_add_test(my_test_suite, "calculate_cost", test_calculate_cost) ==
-       NULL) ||
-      (CU_add_test(my_test_suite, "checkout_cart", test_checkout_cart) ==
-       NULL) ||
-
+      (CU_add_test(db_tests, "add_to_cart", test_add_to_cart) == NULL) ||
+      (CU_add_test(db_tests, "calculate_cost", test_calculate_cost) == NULL) ||
+      (CU_add_test(db_tests, "checkout_cart", test_checkout_cart) == NULL) ||
       0) {
     CU_cleanup_registry();
     return CU_get_error();

@@ -189,22 +189,20 @@ int main()
   if (CU_initialize_registry() != CUE_SUCCESS)
     return CU_get_error();
 
-  CU_pSuite my_test_suite =
-      CU_add_suite("UI test suite", init_suite, clean_suite);
+  CU_pSuite ui_tests = CU_add_suite("UI test suite", init_suite, clean_suite);
 
-  if (my_test_suite == NULL) {
+  if (ui_tests == NULL) {
     CU_cleanup_registry();
     return CU_get_error();
   }
 
-  if ((CU_add_test(my_test_suite, "Add item", test_input_merch) == NULL ||
-       CU_add_test(my_test_suite, "Remove item", test_remove_item) == NULL ||
-       CU_add_test(my_test_suite, "Edit item", test_edit_item) == NULL) ||
-      CU_add_test(my_test_suite, "Replenish stock", test_replenish_stock) ==
-          NULL ||
-      CU_add_test(my_test_suite, "Add to cart", test_cart_add) == NULL ||
-      CU_add_test(my_test_suite, "Remove from cart", test_cart_remove) ==
-          NULL ||
+  if ((CU_add_test(ui_tests, "Add item", test_input_merch) == NULL) ||
+      (CU_add_test(ui_tests, "Remove item", test_remove_item) == NULL) ||
+      (CU_add_test(ui_tests, "Edit item", test_edit_item) == NULL) ||
+      (CU_add_test(ui_tests, "Replenish stock", test_replenish_stock) ==
+       NULL) ||
+      (CU_add_test(ui_tests, "Add to cart", test_cart_add) == NULL) ||
+      (CU_add_test(ui_tests, "Remove from cart", test_cart_remove) == NULL) ||
       0) {
     CU_cleanup_registry();
     return CU_get_error();
