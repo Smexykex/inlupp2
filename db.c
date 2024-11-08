@@ -277,6 +277,7 @@ static void decrease_stock(merch_t *merch, size_t quantity)
 
     if (location->quantity > quantity) {
       location->quantity -= quantity;
+      free(iterator);
       return;
     } else {
       quantity -= location->quantity;

@@ -434,5 +434,3 @@ void event_loop()
 
   destroy_store(store);
 }
-
-int main() { event_loop(); }
