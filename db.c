@@ -12,9 +12,23 @@
 
 extern char *strdup(const char *);
 
+void destroy_location(location_t *location)
+{
+  free(location->shelf);
+  free(location);
+}
+
+bool location_equals(elem_t element_1, elem_t element_2)
+{
+  location_t shelf_1 = *(location_t *)element_1.p;
+  location_t shelf_2 = *(location_t *)element_2.p;
+
+  return strcmp(shelf_1.shelf, shelf_2.shelf) == 0;
+}
+
 // Creates an empty locations list if NULL
-merch_t *create_merch(char *name, char *description, int price,
-                      ioopm_list_t *locations)
+merch_t *create_merch(char *name, char *description, size_t price,
+                      location_list_t *locations)
 {
   merch_t *merch = calloc(1, sizeof(merch_t));
 
@@ -22,12 +36,12 @@ merch_t *create_merch(char *name, char *description, int price,
   merch->description = strdup(description);
   merch->price = price;
   merch->locations =
-      locations != NULL ? locations : ioopm_linked_list_create(shelf_equals);
+      locations != NULL ? locations : ioopm_linked_list_create(location_equals);
   return merch;
 }
 
-// does not edit locations
-void edit_merch(ioopm_hash_table_t *store, char *name, merch_t new_value)
+// does not alter locations
+void edit_merch(merch_table_t *store, char *name, merch_t new_value)
 {
   merch_t *item = (merch_t *)ioopm_hash_table_lookup(store, s_elem(name))->p;
   assert(item != NULL);
@@ -43,12 +57,6 @@ void edit_merch(ioopm_hash_table_t *store, char *name, merch_t new_value)
   item->locations = item->locations;
 
   ioopm_hash_table_insert(store, s_elem(item->name), p_elem(item));
-}
-
-void destroy_location(location_t *location)
-{
-  free(location->shelf);
-  free(location);
 }
 
 void destroy_merch(merch_t *merch)
@@ -67,7 +75,7 @@ void destroy_merch(merch_t *merch)
   free(merch);
 }
 
-void destroy_store(ioopm_hash_table_t *store)
+void destroy_store(merch_table_t *store)
 {
   size_t size = ioopm_hash_table_size(store);
   elem_t *items = ioopm_hash_table_values(store);
@@ -80,15 +88,15 @@ void destroy_store(ioopm_hash_table_t *store)
   free(items);
 }
 
-merch_t *add_item_to_db(ioopm_hash_table_t *store, char *name,
-                        char *description, int price)
+merch_t *add_item_to_db(merch_table_t *store, char *name, char *description,
+                        size_t price)
 {
   merch_t *merch = create_merch(name, description, price, NULL);
   ioopm_hash_table_insert(store, s_elem(merch->name), p_elem(merch));
   return merch;
 }
 
-bool is_shelf_taken(ioopm_hash_table_t *store, char *shelf)
+bool is_shelf_taken(merch_table_t *store, char *shelf)
 {
   size_t size = ioopm_hash_table_size(store);
   elem_t *items = ioopm_hash_table_values(store);
@@ -114,7 +122,7 @@ bool is_shelf_taken(ioopm_hash_table_t *store, char *shelf)
   return false;
 }
 
-bool increase_stock(ioopm_hash_table_t *store, char *merch_name, char *shelf,
+bool increase_stock(merch_table_t *store, char *merch_name, char *shelf,
                     size_t add_quantity)
 {
   if (!is_valid_shelf(shelf)) {
@@ -166,7 +174,7 @@ void destroy_cart(cart_t *cart)
 
 struct name_sum {
   char *item_name;
-  int sum;
+  size_t sum;
 };
 
 void cart_quantity_sum(elem_t cart_id, elem_t *cart_elem, void *acc)
@@ -206,22 +214,21 @@ void increase_cart_quantity(cart_t *cart, char *item_name, size_t quantity)
   }
 }
 
-// carts: key: int id, value: cart_t cart
-bool add_to_cart(ioopm_hash_table_t *store, ioopm_hash_table_t *carts,
+bool add_to_cart(merch_table_t *store, cart_table_t *cart_storage,
                  size_t cart_id, char *item_name, size_t quantity)
 {
   size_t total_stock =
       get_total_stock(ioopm_hash_table_lookup(store, s_elem(item_name))->p);
 
   struct name_sum ns = {.item_name = item_name, .sum = 0};
-  ioopm_hash_table_apply_to_all(carts,
+  ioopm_hash_table_apply_to_all(cart_storage,
                                 (ioopm_apply_function *)cart_quantity_sum, &ns);
-  int total_in_carts = ns.sum;
+  size_t total_in_carts = ns.sum;
 
   if (quantity + total_in_carts > total_stock) {
     return false;
   } else {
-    elem_t *lookup = ioopm_hash_table_lookup(carts, u_elem(cart_id));
+    elem_t *lookup = ioopm_hash_table_lookup(cart_storage, u_elem(cart_id));
     if (lookup == NULL) {
       return false;
     }
@@ -248,7 +255,7 @@ bool remove_from_cart(cart_t *cart, char *name, size_t quantity)
   return true;
 }
 
-size_t calculate_cost(ioopm_hash_table_t *store, cart_t *cart)
+size_t calculate_cost(merch_table_t *store, cart_t *cart)
 {
   char **items = &ioopm_hash_table_keys(cart->items)->s;
   size_t *quantities = &ioopm_hash_table_values(cart->items)->u;
@@ -289,7 +296,7 @@ static void decrease_stock(merch_t *merch, size_t quantity)
   assert(quantity == 0);
 }
 
-void checkout_cart(ioopm_hash_table_t *store, cart_t *cart)
+void checkout_cart(merch_table_t *store, cart_t *cart)
 {
   char **items = &ioopm_hash_table_keys(cart->items)->s;
   size_t *quantities = &ioopm_hash_table_values(cart->items)->u;

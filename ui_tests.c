@@ -25,13 +25,13 @@ int clean_suite(void)
 
 void test_input_merch()
 {
-  ioopm_hash_table_t *merch_data_base =
+  merch_table_t *store =
       ioopm_hash_table_create(string_sum_hash, str_eq_function);
 
-  input_merch(merch_data_base);
+  input_merch(store);
 
   elem_t merch_key = {.s = "max"};
-  elem_t *added_item = ioopm_hash_table_lookup(merch_data_base, merch_key);
+  elem_t *added_item = ioopm_hash_table_lookup(store, merch_key);
 
   if (added_item == NULL) {
     CU_ASSERT(false);
@@ -44,32 +44,30 @@ void test_input_merch()
     CU_ASSERT_PTR_NOT_NULL(added_merch->locations);
   }
 
-  destroy_store(merch_data_base);
+  destroy_store(store);
 }
 
 void test_remove_item()
 {
-  ioopm_hash_table_t *merch_data_base =
+  merch_table_t *store =
       ioopm_hash_table_create(string_sum_hash, str_eq_function);
 
-  add_item_to_db(merch_data_base, "alvin", "test", 100);
-  add_item_to_db(merch_data_base, "max", "test", 100);
+  add_item_to_db(store, "alvin", "test", 100);
+  add_item_to_db(store, "max", "test", 100);
 
-  remove_item_from_db(merch_data_base);
+  remove_item_from_db(store);
 
-  CU_ASSERT_EQUAL(ioopm_hash_table_size(merch_data_base), 1);
-  CU_ASSERT_FALSE(ioopm_hash_table_has_key(merch_data_base, s_elem("alvin")));
+  CU_ASSERT_EQUAL(ioopm_hash_table_size(store), 1);
+  CU_ASSERT_FALSE(ioopm_hash_table_has_key(store, s_elem("alvin")));
 
-  destroy_store(merch_data_base);
+  destroy_store(store);
 }
 
 void test_edit_item()
 {
-  ioopm_hash_table_t *store =
+  merch_table_t *store =
       ioopm_hash_table_create(string_sum_hash, str_eq_function);
 
-  // input_merch(store);
-  // input_merch(store);
   add_item_to_db(store, "alvin", "test1", 100);
   add_item_to_db(store, "elias", "test2", 100);
 
@@ -89,7 +87,7 @@ void test_edit_item()
 
 void test_replenish_stock()
 {
-  ioopm_hash_table_t *store =
+  merch_table_t *store =
       ioopm_hash_table_create(string_sum_hash, str_eq_function);
 
   add_item_to_db(store, "alvin", "test description", 100);
@@ -129,10 +127,10 @@ void test_replenish_stock()
 
 void test_cart_add()
 {
-  ioopm_hash_table_t *store =
+  merch_table_t *store =
       ioopm_hash_table_create(string_sum_hash, str_eq_function);
 
-  ioopm_hash_table_t *cart_storage = ioopm_hash_table_create(NULL, NULL);
+  cart_table_t *cart_storage = ioopm_hash_table_create(NULL, NULL);
 
   add_item_to_db(store, "phone", "test", 100);
   increase_stock(store, "phone", "A0", 5);
@@ -160,10 +158,10 @@ void test_cart_add()
 
 void test_cart_remove()
 {
-  ioopm_hash_table_t *store =
+  merch_table_t *store =
       ioopm_hash_table_create(string_sum_hash, str_eq_function);
 
-  ioopm_hash_table_t *cart_storage = ioopm_hash_table_create(NULL, NULL);
+  cart_table_t *cart_storage = ioopm_hash_table_create(NULL, NULL);
 
   add_item_to_db(store, "phone", "test", 100);
   increase_stock(store, "phone", "A0", 5);

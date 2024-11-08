@@ -230,15 +230,6 @@ void ioopm_linked_list_apply_to_all(ioopm_list_t *list,
   }
 }
 
-ioopm_list_iterator_t *ioopm_list_iterator(ioopm_list_t *list)
-{
-  assert(list != NULL);
-
-  ioopm_list_iterator_t *iterator = malloc(sizeof(ioopm_list_iterator_t));
-  iterator->current = list->first, iterator->list = list;
-  return iterator;
-}
-
 int ioopm_list_index_of(ioopm_list_t *list, elem_t elem)
 {
   assert(list != NULL);

@@ -18,6 +18,22 @@
 #include <stdbool.h>
 #include <stdlib.h>
 
+typedef struct list_entry list_entry_t;
+
+struct list_entry {
+  elem_t value;
+  list_entry_t *next;
+};
+
+typedef struct list ioopm_list_t;
+
+struct list {
+  list_entry_t *first;
+  list_entry_t *last;
+  int size;
+  ioopm_eq_function *eq_func;
+};
+
 /// @brief Creates a new empty list
 /// @param eq_func Function for determening equiality in the list
 /// @return an empty linked list
@@ -110,11 +126,6 @@ bool ioopm_linked_list_any(ioopm_list_t *list, ioopm_predicate *prop,
 /// internal calls of fun
 void ioopm_linked_list_apply_to_all(ioopm_list_t *list,
                                     ioopm_apply_function *fun, void *extra);
-
-/// @brief Get an iterator to a list
-/// @param list the linked list
-/// @return an pointer to an iterator for the list
-ioopm_list_iterator_t *ioopm_list_iterator(ioopm_list_t *list);
 
 /// @brief Get the index of an element in a list
 /// @param list a list

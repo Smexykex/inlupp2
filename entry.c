@@ -38,7 +38,7 @@ ioopm_entry_t *ioopm_find_previous_entry_for_key(ioopm_entry_t *entry,
   return entry;
 }
 
-int ioopm_entry_size(ioopm_entry_t *entry) {
+size_t ioopm_entry_size(ioopm_entry_t *entry) {
   if (entry == NULL) {
     return 0;
   } else {

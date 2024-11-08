@@ -37,11 +37,3 @@ bool is_valid_shelf(char *shelf)
   }
   return true;
 }
-
-bool shelf_equals(elem_t element_1, elem_t element_2)
-{
-  location_t shelf_1 = *(location_t *)element_1.p;
-  location_t shelf_2 = *(location_t *)element_2.p;
-
-  return strcmp(shelf_1.shelf, shelf_2.shelf) == 0;
-}

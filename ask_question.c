@@ -6,6 +6,21 @@
 
 #include "ask_question.h"
 
+bool is_natural(char *str)
+{
+  if (*str == '\0') {
+    return false;
+  }
+
+  while (*str != '\0') {
+    if (!isdigit(*str)) {
+      return false;
+    }
+    str++;
+  }
+  return true;
+}
+
 bool is_number(char *str)
 {
   if (strlen(str) == 0) {
@@ -94,6 +109,12 @@ answer_t ask_question(char *question, check_func *check, convert_func *conv)
   } while (string_size == 0 || !check(answer));
 
   return conv(answer);
+}
+
+size_t ask_question_size(char *question)
+{
+  answer_t ans = ask_question(question, is_natural, (convert_func *)atoi);
+  return ans.int_value;
 }
 
 int ask_question_int(char *question)

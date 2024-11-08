@@ -4,19 +4,28 @@
  * @date 6 Oct 2024
  * @brief Iterator for a linked list.
  * Contains functions that make it easier to use an iterator.
- * Error handling is done with `assert`; we check if the pointer to the iterator is not `NULL`.
- * When needed. We also check if the iterator is on the last element in the underlying list.
- * 
- * Iterators are stored on the heap, so they must be freed with `ioopm_iterator_destroy`.
- * This does not free the underlying list.
+ * Error handling is done with `assert`; we check if the pointer to the iterator
+ * is not `NULL`. When needed. We also check if the iterator is on the last
+ * element in the underlying list.
+ *
+ * Iterators are stored on the heap, so they must be freed with
+ * `ioopm_iterator_destroy`. This does not free the underlying list.
  */
 
 #pragma once
-#include "common.h"
+
+#include "linked_list.h"
+
+typedef struct ioopm_list_iterator ioopm_list_iterator_t;
+
+/// @brief Get an iterator to a list
+/// @param list the linked list
+/// @return an pointer to an iterator for the list
+ioopm_list_iterator_t *ioopm_list_iterator(ioopm_list_t *list);
 
 /// @brief Checks if there are more elements to iterate over
 /// @param iter the iterator
-/// @return true if there is at least one more element 
+/// @return true if there is at least one more element
 bool ioopm_iterator_has_next(ioopm_list_iterator_t *iter);
 
 /// @brief Step the iterator forward one step

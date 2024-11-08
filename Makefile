@@ -10,10 +10,10 @@ TEST_FILES=test_files/add_test.txt \
 %.o: %.c %.h
 	$(CC) $(FLAGS) $< -c
 
-store: store.o ui.o db.o utils.o common.o linked_list.o iterator.o hash_table.o entry.o
+store: store.o ui.o db.o ask_question.o common.o linked_list.o iterator.o hash_table.o entry.o
 	$(CC) $(FLAGS) $^ -o $@
 
-db_tests: db_tests.c db.o ui.o utils.o common.o linked_list.o iterator.o hash_table.o entry.o
+db_tests: db_tests.c db.o ui.o ask_question.o common.o linked_list.o iterator.o hash_table.o entry.o
 	$(CC) $(FLAGS) $^ -lcunit -o $@
 
 testdb: db_tests
@@ -22,7 +22,7 @@ testdb: db_tests
 memtestdb: db_tests
 	valgrind --leak-check=full ./db_tests
 
-ui_tests: ui_tests.c db.o ui.o utils.o common.o linked_list.o iterator.o hash_table.o entry.o
+ui_tests: ui_tests.c db.o ui.o ask_question.o common.o linked_list.o iterator.o hash_table.o entry.o
 	$(CC) $(FLAGS) $^ -lcunit -o $@
 
 all_tests.txt: $(TEST_FILES)
@@ -42,6 +42,6 @@ testuileaks: testui
 	leaks -quiet -atExit -- ./ui_tests < ./test_files/all_tests.txt
 
 clean:
-	rm *.o db_tests ui_tests ./test_files/all_tests.txt store
+	rm -rf *.o db_tests ui_tests ./test_files/all_tests.txt store *.dSYM
 
 .PHONY: clean testdb memtestdb memtestui

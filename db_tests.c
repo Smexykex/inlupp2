@@ -66,8 +66,8 @@ void test_make_merch()
 {
   char *name = "alvin";
   char *description = "test description";
-  int price = 100;
-  ioopm_list_t *merch_list = ioopm_linked_list_create(shelf_equals);
+  size_t price = 100;
+  ioopm_list_t *merch_list = ioopm_linked_list_create(location_equals);
 
   merch_t *made_item = create_merch(name, description, price, merch_list);
 
@@ -81,7 +81,7 @@ void test_make_merch()
 
 void test_add_merch()
 {
-  ioopm_hash_table_t *store =
+  merch_table_t *store =
       ioopm_hash_table_create(string_sum_hash, str_eq_function);
 
   add_item_to_db(store, "alvin", "test", 100);
@@ -98,7 +98,7 @@ void test_add_merch()
 
 void test_edit_merch()
 {
-  ioopm_hash_table_t *store =
+  merch_table_t *store =
       ioopm_hash_table_create(string_sum_hash, str_eq_function);
 
   add_item_to_db(store, "alvin", "test", 100);
@@ -124,7 +124,7 @@ void test_edit_merch()
 
 void test_increase_stock()
 {
-  ioopm_hash_table_t *store =
+  merch_table_t *store =
       ioopm_hash_table_create(string_sum_hash, str_eq_function);
 
   char *test_name = "alvin";
@@ -160,7 +160,7 @@ void test_increase_stock()
 
 void test_increase_stock_taken_shelf()
 {
-  ioopm_hash_table_t *store =
+  merch_table_t *store =
       ioopm_hash_table_create(string_sum_hash, str_eq_function);
 
   add_item_to_db(store, "alvin", "test description", 100);
@@ -184,7 +184,7 @@ void test_increase_stock_taken_shelf()
 
 void test_increase_stock_different_quantities()
 {
-  ioopm_hash_table_t *store =
+  merch_table_t *store =
       ioopm_hash_table_create(string_sum_hash, str_eq_function);
 
   add_item_to_db(store, "alvin", "test description", 100);
@@ -214,7 +214,7 @@ void test_increase_stock_different_quantities()
 
 void test_get_total_stock()
 {
-  ioopm_hash_table_t *store =
+  merch_table_t *store =
       ioopm_hash_table_create(string_sum_hash, str_eq_function);
 
   char *item_name = "pen";
@@ -240,7 +240,7 @@ void test_get_total_stock()
 
 void test_add_to_cart()
 {
-  ioopm_hash_table_t *store =
+  merch_table_t *store =
       ioopm_hash_table_create(string_sum_hash, str_eq_function);
 
   char *item_name = "pen";
@@ -249,7 +249,7 @@ void test_add_to_cart()
 
   cart_t *cart = create_cart(1);
 
-  ioopm_hash_table_t *carts = ioopm_hash_table_create(NULL, NULL);
+  cart_table_t *carts = ioopm_hash_table_create(NULL, NULL);
 
   ioopm_hash_table_insert(carts, i_elem(1), p_elem(cart));
 
@@ -293,7 +293,7 @@ void test_remove_from_cart()
 
 void test_calculate_cost()
 {
-  ioopm_hash_table_t *store =
+  merch_table_t *store =
       ioopm_hash_table_create(string_sum_hash, str_eq_function);
 
   cart_t *cart = create_cart(1);
@@ -314,7 +314,7 @@ void test_calculate_cost()
 
 void test_checkout_cart()
 {
-  ioopm_hash_table_t *store =
+  merch_table_t *store =
       ioopm_hash_table_create(string_sum_hash, str_eq_function);
 
   cart_t *cart = create_cart(1);
