@@ -6,6 +6,7 @@
 
 #include "common.h"
 #include "db.h"
+#include "hash_table.h"
 #include "iterator.h"
 #include "linked_list.h"
 #include "utils.h"
@@ -231,5 +232,20 @@ bool add_to_cart(ioopm_hash_table_t *store, ioopm_hash_table_t *carts,
   }
 }
 
-// TODO
-void remove_from_cart() { puts("Not yet implemented!"); }
+bool remove_from_cart(cart_t *cart, char *name, int quantity)
+{
+  elem_t *lookup = ioopm_hash_table_lookup(cart->items, s_elem(name));
+
+  if (lookup == NULL) {
+    return false;
+  }
+
+  size_t quantity_of_item = lookup->u;
+
+  if (quantity > quantity_of_item) {
+    return false;
+  }
+
+  lookup->u = quantity_of_item - quantity;
+  return true;
+}

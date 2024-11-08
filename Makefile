@@ -3,7 +3,9 @@ FLAGS=-pedantic -Wall -g
 TEST_FILES=test_files/add_test.txt \
            test_files/remove_test.txt \
            test_files/edit_test.txt \
-					 test_files/replenish_test.txt
+		   test_files/replenish_test.txt \
+		   test_files/cart_add_test.txt \
+		   test_files/cart_remove_test.txt
 
 %.o: %.c %.h
 	$(CC) $(FLAGS) $< -c

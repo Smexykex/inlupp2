@@ -273,6 +273,24 @@ void test_add_to_cart()
   destroy_store(store);
 }
 
+void test_remove_from_cart()
+{
+  cart_t *cart1 = create_cart(1);
+  increase_cart_quantity(cart1, "phone", 5);
+  remove_from_cart(cart1, "phone", 3);
+
+  size_t quantity = ioopm_hash_table_lookup(cart1->items, s_elem("phone"))->u;
+
+  CU_ASSERT_EQUAL(quantity, 2);
+
+  remove_from_cart(cart1, "phone", 3);
+  quantity = ioopm_hash_table_lookup(cart1->items, s_elem("phone"))->u;
+
+  CU_ASSERT_EQUAL(quantity, 2);
+
+  destroy_cart(cart1);
+}
+
 int main()
 {
   if (CU_initialize_registry() != CUE_SUCCESS)

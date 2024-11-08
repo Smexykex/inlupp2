@@ -1,6 +1,7 @@
 #pragma once
 
 #include "common.h"
+#include "db.h"
 #include "hash_table.h"
 
 void input_merch(ioopm_hash_table_t *store);
@@ -18,6 +19,12 @@ void edit_db(ioopm_hash_table_t *store);
 void show_stock(ioopm_hash_table_t *store);
 
 void replenish_stock(ioopm_hash_table_t *store);
+
+cart_t *new_cart(ioopm_hash_table_t *cart_storage, int id);
+
+void cart_add(ioopm_hash_table_t *store, ioopm_hash_table_t *cart_storage);
+
+void cart_remove(ioopm_hash_table_t *store, ioopm_hash_table_t *cart_storage);
 
 void print_menu();
 

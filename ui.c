@@ -206,9 +206,11 @@ void replenish_stock(ioopm_hash_table_t *store)
   };
 }
 
-void new_cart(ioopm_hash_table_t *cart_storage, int id)
+cart_t *new_cart(ioopm_hash_table_t *cart_storage, int id)
 {
-  ioopm_hash_table_insert(cart_storage, i_elem(id), p_elem(create_cart(id)));
+  cart_t *new_cart = create_cart(id);
+  ioopm_hash_table_insert(cart_storage, i_elem(id), p_elem(new_cart));
+  return new_cart;
 }
 
 void remove_cart(ioopm_hash_table_t *cart_storage)
@@ -230,11 +232,57 @@ void remove_cart(ioopm_hash_table_t *cart_storage)
   }
 }
 
-// TODO
-void cart_add() {}
+void cart_add(ioopm_hash_table_t *store, ioopm_hash_table_t *cart_storage)
+{
+  if (ioopm_hash_table_size(cart_storage) == 0) {
+    printf("No carts in storage!\n");
+    return;
+  }
 
-// TODO
-void cart_remove() {}
+  int id;
+  elem_t *lookup = NULL;
+
+  while (lookup == NULL) {
+    id = ask_question_int("Cart ID: ");
+    lookup = ioopm_hash_table_lookup(cart_storage, i_elem(id));
+  }
+
+  merch_t *merch = ask_question_merch(store, "Merch to add to cart: ");
+  int quantity = ask_question_int("Amount of merch: ");
+
+  bool success = add_to_cart(store, cart_storage, id, merch->name, quantity);
+
+  if (!success) {
+    printf("Not enough in stock");
+  }
+}
+
+void cart_remove(ioopm_hash_table_t *store, ioopm_hash_table_t *cart_storage)
+{
+  if (ioopm_hash_table_size(cart_storage) == 0) {
+    printf("No carts in storage!\n");
+    return;
+  }
+
+  int id;
+  elem_t *lookup = NULL;
+
+  while (lookup == NULL) {
+    id = ask_question_int("Cart ID: ");
+    lookup = ioopm_hash_table_lookup(cart_storage, i_elem(id));
+  }
+
+  cart_t *cart = lookup->p;
+
+  merch_t *merch = ask_question_merch(store, "Merch to remove from cart: ");
+  int quantity = ask_question_int("Amount of merch: ");
+
+  bool success = remove_from_cart(cart, merch->name, quantity);
+
+  if (!success) {
+    printf("Not enough in cart");
+  }
+}
 
 // TODO
 void calculate_cost() {}
@@ -294,7 +342,7 @@ char ask_question_menu()
 void event_loop()
 {
   // Change hash function?
-  ioopm_hash_table_t *merch_data_base =
+  ioopm_hash_table_t *store =
       ioopm_hash_table_create(hash_function_void, str_eq_function);
 
   ioopm_hash_table_t *cart_storage = ioopm_hash_table_create(NULL, NULL);
@@ -309,22 +357,22 @@ void event_loop()
 
     switch (answer) {
       case 'A':
-        input_merch(merch_data_base);
+        input_merch(store);
         break;
       case 'L':
-        list_db(merch_data_base);
+        list_db(store);
         break;
       case 'D':
-        remove_item_from_db(merch_data_base);
+        remove_item_from_db(store);
         break;
       case 'E':
-        edit_db(merch_data_base);
+        edit_db(store);
         break;
       case 'S':
-        show_stock(merch_data_base);
+        show_stock(store);
         break;
       case 'P':
-        replenish_stock(merch_data_base);
+        replenish_stock(store);
         break;
       case 'C':
         new_cart(cart_storage, cart_id_next);
@@ -334,10 +382,10 @@ void event_loop()
         remove_cart(cart_storage);
         break;
       case '+':
-        cart_add();
+        cart_add(store, cart_storage);
         break;
       case '-':
-        cart_remove();
+        cart_remove(store, cart_storage);
         break;
       case '=':
         calculate_cost();
@@ -353,5 +401,5 @@ void event_loop()
     }
   } while (true);
 
-  destroy_store(merch_data_base);
+  destroy_store(store);
 }

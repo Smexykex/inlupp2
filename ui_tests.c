@@ -1,4 +1,7 @@
 #include <CUnit/Basic.h>
+#include <CUnit/CUnit.h>
+#include <string.h>
+#include <time.h>
 
 #include "common.h"
 #include "db.h"
@@ -124,6 +127,65 @@ void test_replenish_stock()
   destroy_store(store);
 }
 
+void test_cart_add()
+{
+  ioopm_hash_table_t *store =
+      ioopm_hash_table_create(string_sum_hash, str_eq_function);
+
+  ioopm_hash_table_t *cart_storage = ioopm_hash_table_create(NULL, NULL);
+
+  add_item_to_db(store, "phone", "test", 100);
+  increase_stock(store, "phone", "A0", 5);
+  cart_t *cart1 = new_cart(cart_storage, 1);
+
+  cart_add(store, cart_storage);
+  cart_add(store, cart_storage);
+
+  size_t quantity = ioopm_hash_table_lookup(cart1->items, s_elem("phone"))->u;
+
+  CU_ASSERT_EQUAL(quantity, 5);
+
+  cart_t *cart2 = new_cart(cart_storage, 2);
+  cart_add(store, cart_storage);
+
+  elem_t *lookup = ioopm_hash_table_lookup(cart2->items, s_elem("phone"));
+
+  CU_ASSERT_PTR_NULL(lookup);
+
+  destroy_store(store);
+  ioopm_hash_table_destroy(cart_storage);
+  destroy_cart(cart1);
+  destroy_cart(cart2);
+}
+
+void test_cart_remove()
+{
+  ioopm_hash_table_t *store =
+      ioopm_hash_table_create(string_sum_hash, str_eq_function);
+
+  ioopm_hash_table_t *cart_storage = ioopm_hash_table_create(NULL, NULL);
+
+  add_item_to_db(store, "phone", "test", 100);
+  increase_stock(store, "phone", "A0", 5);
+  cart_t *cart1 = new_cart(cart_storage, 1);
+
+  add_to_cart(store, cart_storage, 1, "phone", 5);
+
+  cart_remove(store, cart_storage);
+  size_t quantity = ioopm_hash_table_lookup(cart1->items, s_elem("phone"))->u;
+
+  CU_ASSERT_EQUAL(quantity, 2);
+
+  cart_remove(store, cart_storage);
+  quantity = ioopm_hash_table_lookup(cart1->items, s_elem("phone"))->u;
+
+  CU_ASSERT_EQUAL(quantity, 2);
+
+  destroy_store(store);
+  ioopm_hash_table_destroy(cart_storage);
+  destroy_cart(cart1);
+}
+
 int main()
 {
   if (CU_initialize_registry() != CUE_SUCCESS)
@@ -141,6 +203,9 @@ int main()
        CU_add_test(my_test_suite, "Remove item", test_remove_item) == NULL ||
        CU_add_test(my_test_suite, "Edit item", test_edit_item) == NULL) ||
       CU_add_test(my_test_suite, "Replenish stock", test_replenish_stock) ==
+          NULL ||
+      CU_add_test(my_test_suite, "Add to cart", test_cart_add) == NULL ||
+      CU_add_test(my_test_suite, "Remove from cart", test_cart_remove) ==
           NULL ||
       0) {
     CU_cleanup_registry();

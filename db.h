@@ -3,6 +3,7 @@
 #include "common.h"
 #include "hash_table.h"
 #include <stdbool.h>
+#include <stdlib.h>
 
 typedef struct cart cart_t;
 
@@ -34,5 +35,9 @@ cart_t *create_cart(size_t id);
 
 void destroy_cart(cart_t *cart);
 
+void increase_cart_quantity(cart_t *cart, char *item_name, size_t quantity);
+
 bool add_to_cart(ioopm_hash_table_t *store, ioopm_hash_table_t *carts,
                  size_t cart_id, char *item_name, size_t quantity);
+
+bool remove_from_cart(cart_t *cart, char *name, int quantity);
