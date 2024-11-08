@@ -9,7 +9,6 @@
 #include "hash_table.h"
 #include "iterator.h"
 #include "linked_list.h"
-#include "utils.h"
 
 extern char *strdup(const char *);
 
@@ -295,8 +294,6 @@ void checkout_cart(ioopm_hash_table_t *store, cart_t *cart)
   char **items = &ioopm_hash_table_keys(cart->items)->s;
   size_t *quantities = &ioopm_hash_table_values(cart->items)->u;
   size_t size = ioopm_hash_table_size(cart->items);
-
-  size_t sum = 0;
 
   for (size_t i = 0; i < size; i++) {
     merch_t *merch = ioopm_hash_table_lookup(store, s_elem(items[i]))->p;

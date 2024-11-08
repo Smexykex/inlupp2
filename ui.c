@@ -3,6 +3,7 @@
 #include <stdio.h>
 #include <string.h>
 
+#include "ask_question.h"
 #include "common.h"
 #include "db.h"
 #include "hash_table.h"
@@ -10,7 +11,6 @@
 #include "linked_list.h"
 #include "stdlib.h"
 #include "ui.h"
-#include "utils.h"
 
 // TODO should make some functions static, though many are exposed for testing
 
@@ -337,17 +337,16 @@ void print_menu()
               "[-] Remove from cart\n"
               "[=] Calculate cost\n"
               "Check[O]ut\n"
-              "[Q]uit\n";
+              "[Q]uit";
   printf("%s", str);
 }
 
-bool is_menu_option(char *input_string)
+bool is_menu_option(char c)
 {
   char *valid_inputs = "AaLlDdEeSsPpCcRr+-=OoQq";
-  char check_char = input_string[0];
 
   for (int i = 0; i < strlen(valid_inputs); i++) {
-    if (check_char == valid_inputs[i]) {
+    if (c == valid_inputs[i]) {
       return true;
     }
   }
@@ -355,16 +354,14 @@ bool is_menu_option(char *input_string)
   return false;
 }
 
-// Could maybe rewrite using ask_question
 char ask_question_menu()
 {
-  char answer[100];
-  int string_size = 0;
+  char *answer;
 
   do {
     print_menu();
-    string_size = read_string(answer, 99);
-  } while (!(string_size == 1 && is_menu_option(answer)));
+    answer = ask_question_string("");
+  } while (!(is_menu_option(answer[0])));
 
   return answer[0];
 }
