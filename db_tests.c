@@ -1,12 +1,7 @@
 #include <CUnit/Basic.h>
 #include <CUnit/CUnit.h>
-#include <assert.h>
-#include <time.h>
 
-#include "common.h"
 #include "db.h"
-#include "hash_table.h"
-#include "linked_list.h"
 
 int init_suite(void)
 {
@@ -95,7 +90,7 @@ void test_edit_merch()
   edit_merch(store, "alvin", new_item);
 
   merch_t *edited_item = ioopm_hash_table_lookup(store, s_elem("max"))->p;
-  assert(edited_item != NULL);
+  CU_ASSERT(edited_item != NULL);
 
   CU_ASSERT_STRING_EQUAL(edited_item->name, "max");
   CU_ASSERT_STRING_EQUAL(edited_item->description, "new desc");

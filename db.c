@@ -4,11 +4,8 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "common.h"
 #include "db.h"
-#include "hash_table.h"
 #include "iterator.h"
-#include "linked_list.h"
 
 extern char *strdup(const char *);
 

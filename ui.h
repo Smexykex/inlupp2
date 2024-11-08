@@ -1,8 +1,6 @@
 #pragma once
 
-#include "common.h"
 #include "db.h"
-#include "hash_table.h"
 
 /// @brief Adds a merch to the merch database by asking for a name, a
 /// description and a price.

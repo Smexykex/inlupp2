@@ -1,12 +1,6 @@
 #include <CUnit/Basic.h>
 #include <CUnit/CUnit.h>
-#include <string.h>
-#include <time.h>
 
-#include "common.h"
-#include "db.h"
-#include "hash_table.h"
-#include "linked_list.h"
 #include "ui.h"
 
 int init_suite(void)

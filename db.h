@@ -1,10 +1,10 @@
 #pragma once
 
-#include "common.h"
-#include "hash_table.h"
-#include "linked_list.h"
 #include <stdbool.h>
 #include <stdlib.h>
+
+#include "hash_table.h"
+#include "linked_list.h"
 
 // value: elem_t { .p = location }
 typedef ioopm_list_t location_list_t;

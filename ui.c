@@ -1,14 +1,9 @@
 #include <ctype.h>
-#include <stdbool.h>
 #include <stdio.h>
 #include <string.h>
 
 #include "ask_question.h"
-#include "common.h"
-#include "db.h"
-#include "hash_table.h"
 #include "iterator.h"
-#include "stdlib.h"
 #include "ui.h"
 
 // TODO should make some functions static, though many are exposed for testing
