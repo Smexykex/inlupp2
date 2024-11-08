@@ -68,6 +68,13 @@ void destroy_store(merch_table_t *store);
 merch_t *add_item_to_db(merch_table_t *store, char *name, char *description,
                         size_t price);
 
+/// @brief removes an item from the store and all carts that may contain it.
+/// @param store table to remove from
+/// @param cart_storage carts to remove from (can be NULL)
+/// @param item_name name of item
+void remove_item_from_db(merch_table_t *store, cart_table_t *cart_storage,
+                         merch_t *merch);
+
 /// @brief true if there exists an item in the store that has shelf in its
 /// locations
 /// @param store table containing items to check
@@ -115,7 +122,7 @@ bool add_to_cart(merch_table_t *store, cart_table_t *cart_storage,
 /// @param name name of item to remove
 /// @param quantity quantity of item to remove
 /// @return true if successful
-bool remove_from_cart(cart_t *cart, char *name, size_t quantity);
+bool remove_quantity_from_cart(cart_t *cart, char *name, size_t quantity);
 
 /// @brief totals the cost of the cart by summing the item's prices by the
 /// quantities in the cart

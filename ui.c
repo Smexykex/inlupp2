@@ -122,28 +122,22 @@ void list_db(merch_table_t *store)
   free(items);
 }
 
-void remove_item_from_db(merch_table_t *store)
+void delete_merch(merch_table_t *store, cart_table_t *cart_storage)
 {
-  char *merch_name;
-  elem_t *retrived_value;
-
-  do {
-    merch_name = ask_question_string("\nInput merch name: ");
-    retrived_value = ioopm_hash_table_lookup(store, s_elem(merch_name));
-  } while (retrived_value == NULL);
+  if (ioopm_hash_table_size(store) == 0) {
+    puts("No items to delete!");
+    return;
+  }
+  merch_t *merch = ask_question_merch(store, "\nInput merch name: ");
 
   char *confirmation =
       ask_question_string("Do you want delete?, type 'y' for yes ");
 
   if (tolower(confirmation[0]) == 'y') {
-    merch_t *retrived_merch = retrived_value->p;
-
-    ioopm_hash_table_remove(store, s_elem(merch_name));
-    destroy_merch(retrived_merch);
+    remove_item_from_db(store, cart_storage, merch);
   }
 
   free(confirmation);
-  free(merch_name);
 }
 
 // TODO A better name might be edit item
@@ -276,7 +270,7 @@ void cart_remove(merch_table_t *store, cart_table_t *cart_storage)
   merch_t *merch = ask_question_merch(store, "Merch to remove from cart: ");
   size_t quantity = ask_question_size("Amount of merch: ");
 
-  bool success = remove_from_cart(cart, merch->name, quantity);
+  bool success = remove_quantity_from_cart(cart, merch->name, quantity);
 
   if (!success) {
     printf("Not enough in cart");
@@ -388,7 +382,7 @@ void event_loop()
         list_db(store);
         break;
       case 'D':
-        remove_item_from_db(store);
+        delete_merch(store, cart_storage);
         break;
       case 'E':
         edit_db(store);

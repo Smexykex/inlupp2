@@ -55,7 +55,7 @@ void test_remove_item()
   add_item_to_db(store, "alvin", "test", 100);
   add_item_to_db(store, "max", "test", 100);
 
-  remove_item_from_db(store);
+  delete_merch(store, NULL);
 
   CU_ASSERT_EQUAL(ioopm_hash_table_size(store), 1);
   CU_ASSERT_FALSE(ioopm_hash_table_has_key(store, s_elem("alvin")));

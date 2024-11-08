@@ -96,6 +96,22 @@ merch_t *add_item_to_db(merch_table_t *store, char *name, char *description,
   return merch;
 }
 
+static void remove_from_cart(elem_t id, elem_t *cart_e, void *item_name)
+{
+  cart_t *cart = cart_e->p;
+  ioopm_hash_table_remove(cart->items, s_elem(item_name));
+}
+
+void remove_item_from_db(merch_table_t *store, cart_table_t *cart_storage,
+                         merch_t *merch)
+{
+  ioopm_hash_table_remove(store, s_elem(merch->name));
+  if (cart_storage != NULL) {
+    ioopm_hash_table_apply_to_all(cart_storage, remove_from_cart, merch->name);
+  }
+  destroy_merch(merch);
+}
+
 bool is_shelf_taken(merch_table_t *store, char *shelf)
 {
   size_t size = ioopm_hash_table_size(store);
@@ -237,7 +253,7 @@ bool add_to_cart(merch_table_t *store, cart_table_t *cart_storage,
   }
 }
 
-bool remove_from_cart(cart_t *cart, char *name, size_t quantity)
+bool remove_quantity_from_cart(cart_t *cart, char *name, size_t quantity)
 {
   elem_t *lookup = ioopm_hash_table_lookup(cart->items, s_elem(name));
 

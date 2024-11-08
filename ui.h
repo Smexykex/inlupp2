@@ -12,7 +12,7 @@ void print_line();
 
 void list_db(merch_table_t *store);
 
-void remove_item_from_db(merch_table_t *store);
+void delete_merch(merch_table_t *store, cart_table_t *cart_storage);
 
 void edit_db(merch_table_t *store);
 

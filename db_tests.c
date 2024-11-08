@@ -260,13 +260,13 @@ void test_remove_from_cart()
 {
   cart_t *cart1 = create_cart(1);
   increase_cart_quantity(cart1, "phone", 5);
-  remove_from_cart(cart1, "phone", 3);
+  remove_quantity_from_cart(cart1, "phone", 3);
 
   size_t quantity = ioopm_hash_table_lookup(cart1->items, s_elem("phone"))->u;
 
   CU_ASSERT_EQUAL(quantity, 2);
 
-  remove_from_cart(cart1, "phone", 3);
+  remove_quantity_from_cart(cart1, "phone", 3);
   quantity = ioopm_hash_table_lookup(cart1->items, s_elem("phone"))->u;
 
   CU_ASSERT_EQUAL(quantity, 2);
@@ -323,6 +323,38 @@ void test_checkout_cart()
   destroy_cart(cart);
 }
 
+void test_remove_merch()
+{
+  merch_table_t *store =
+      ioopm_hash_table_create(string_sum_hash, str_eq_function);
+  cart_table_t *cart_storage = ioopm_hash_table_create(NULL, NULL);
+
+  cart_t *cart = create_cart(1);
+  ioopm_hash_table_insert(cart_storage, u_elem(1), p_elem(cart));
+  merch_t *merch1 = add_item_to_db(store, "test1", "test", 1);
+  merch_t *merch2 = add_item_to_db(store, "test2", "test", 2);
+  increase_stock(store, "test1", "A01", 5);
+  increase_stock(store, "test2", "A02", 5);
+
+  add_to_cart(store, cart_storage, 1, "test1", 1);
+  add_to_cart(store, cart_storage, 1, "test2", 1);
+
+  remove_item_from_db(store, cart_storage, merch1);
+
+  CU_ASSERT_FALSE(ioopm_hash_table_has_key(store, s_elem("test1")));
+  CU_ASSERT_FALSE(ioopm_hash_table_has_key(cart->items, s_elem("test1")));
+  CU_ASSERT(ioopm_hash_table_has_key(cart->items, s_elem("test2")));
+
+  remove_item_from_db(store, cart_storage, merch2);
+
+  CU_ASSERT(ioopm_hash_table_has_key(store, s_elem("test2")));
+  CU_ASSERT(ioopm_hash_table_has_key(cart->items, s_elem("test2")));
+
+  destroy_store(store);
+  destroy_cart(cart);
+  ioopm_hash_table_destroy(cart_storage);
+}
+
 int main()
 {
   if (CU_initialize_registry() != CUE_SUCCESS)
@@ -352,7 +384,7 @@ int main()
       (CU_add_test(db_tests, "add_to_cart", test_add_to_cart) == NULL) ||
       (CU_add_test(db_tests, "calculate_cost", test_calculate_cost) == NULL) ||
       (CU_add_test(db_tests, "checkout_cart", test_checkout_cart) == NULL) ||
-      0) {
+      (CU_add_test(db_tests, "remove merch", test_remove_merch) == NULL) || 0) {
     CU_cleanup_registry();
     return CU_get_error();
   }
