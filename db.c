@@ -152,7 +152,7 @@ bool increase_stock(merch_table_t *store, ioopm_hash_table_t *location_storage,
 
   elem_t *shelf_lookup =
       ioopm_hash_table_lookup(location_storage, s_elem(shelf));
-  if (shelf_lookup != NULL && shelf_lookup->s != item_name) {
+  if (shelf_lookup != NULL && strcmp(shelf_lookup->s, item_name) != 0) {
     return false;
   }
 
