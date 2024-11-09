@@ -138,32 +138,6 @@ void remove_item_from_db(merch_table_t *store,
   destroy_merch(merch);
 }
 
-bool is_shelf_taken(merch_table_t *store, char *shelf)
-{
-  size_t size = ioopm_hash_table_size(store);
-  elem_t *items = ioopm_hash_table_values(store);
-
-  merch_t *item;
-  location_t *location;
-
-  for (size_t i = 0; i < size; i++) {
-    item = items[i].p;
-
-    ioopm_list_iterator_t *iterator = ioopm_list_iterator(item->locations);
-    while (ioopm_iterator_has_next(iterator)) {
-      location = ioopm_iterator_next(iterator).p;
-      if (strcmp(location->shelf, shelf) == 0) {
-        free(iterator);
-        free(items);
-        return true;
-      }
-    }
-    free(iterator);
-  }
-  free(items);
-  return false;
-}
-
 bool increase_stock(merch_table_t *store, ioopm_hash_table_t *location_storage,
                     char *item_name, char *shelf, size_t quantity)
 {
@@ -193,10 +167,6 @@ bool increase_stock(merch_table_t *store, ioopm_hash_table_t *location_storage,
     }
   }
   free(iterator);
-
-  if (is_shelf_taken(store, shelf)) {
-    return false;
-  };
 
   location_t *new_location = calloc(1, sizeof(location_t));
   new_location->shelf = strdup(shelf);
