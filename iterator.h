@@ -14,14 +14,9 @@
 
 #pragma once
 
-#include "linked_list.h"
+#include "common.h"
 
 typedef struct ioopm_list_iterator ioopm_list_iterator_t;
-
-/// @brief Get an iterator to a list
-/// @param list the linked list
-/// @return an pointer to an iterator for the list
-ioopm_list_iterator_t *ioopm_list_iterator(ioopm_list_t *list);
 
 /// @brief Checks if there are more elements to iterate over
 /// @param iter the iterator

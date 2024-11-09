@@ -5,7 +5,6 @@
 #include <string.h>
 
 #include "db.h"
-#include "iterator.h"
 
 extern char *strdup(const char *);
 

@@ -1,9 +1,9 @@
-#include "iterator.h"
-#include "common.h"
-
 #include <assert.h>
 #include <stdbool.h>
 #include <stdlib.h>
+
+#include "iterator.h"
+#include "linked_list.h"
 
 struct ioopm_list_iterator {
   list_entry_t *current;

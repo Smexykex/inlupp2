@@ -1,8 +1,8 @@
-#include "linked_list.h"
-#include "iterator.h"
 #include <assert.h>
 #include <stdio.h>
 #include <stdlib.h>
+
+#include "linked_list.h"
 
 ioopm_list_t *ioopm_linked_list_create(ioopm_eq_function *eq_func)
 {

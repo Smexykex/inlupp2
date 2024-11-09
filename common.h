@@ -1,5 +1,6 @@
 #pragma once
 
+#include <stdbool.h>
 #include <stdlib.h>
 
 typedef union elem elem_t;
