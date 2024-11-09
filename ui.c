@@ -3,6 +3,7 @@
 #include <string.h>
 
 #include "ask_question.h"
+#include "hash_table.h"
 #include "linked_list.h"
 #include "ui.h"
 
@@ -117,7 +118,8 @@ void list_db(merch_table_t *store)
   free(items);
 }
 
-void delete_merch(merch_table_t *store, cart_table_t *cart_storage)
+void delete_merch(merch_table_t *store, ioopm_hash_table_t *location_storage,
+                  cart_table_t *cart_storage)
 {
   if (ioopm_hash_table_size(store) == 0) {
     puts("No items to delete!");
@@ -129,14 +131,14 @@ void delete_merch(merch_table_t *store, cart_table_t *cart_storage)
       ask_question_string("Do you want delete?, type 'y' for yes ");
 
   if (tolower(confirmation[0]) == 'y') {
-    remove_item_from_db(store, cart_storage, merch);
+    remove_item_from_db(store, location_storage, cart_storage, merch);
   }
 
   free(confirmation);
 }
 
 // TODO A better name might be edit item
-void edit_db(merch_table_t *store)
+void edit_db(merch_table_t *store, ioopm_hash_table_t *location_storage)
 {
   char *name_to_edit;
   elem_t *item;
@@ -168,7 +170,7 @@ void edit_db(merch_table_t *store)
   size_t price = ask_question_size("Input new price: ");
 
   edit_merch(
-      store, merch_to_edit->name,
+      store, location_storage, merch_to_edit->name,
       (merch_t){.name = name, .description = description, .price = price});
 
   free(name);
@@ -187,7 +189,7 @@ void show_stock(merch_table_t *store)
   free(iterator);
 }
 
-void replenish_stock(merch_table_t *store)
+void replenish_stock(merch_table_t *store, ioopm_hash_table_t *location_storage)
 {
   merch_t *merch = ask_question_merch(store, "\nInput merch name: ");
   char *shelf;
@@ -197,7 +199,8 @@ void replenish_stock(merch_table_t *store)
     shelf = ask_question_shelf("\nInput shelf: ");
     quantity = ask_question_size("\nInput quantity to add: ");
 
-    bool success = increase_stock(store, merch->name, shelf, quantity);
+    bool success =
+        increase_stock(store, location_storage, merch->name, shelf, quantity);
     free(shelf);
     if (success) {
       break;
@@ -358,6 +361,9 @@ void event_loop()
   merch_table_t *store =
       ioopm_hash_table_create(string_sum_hash, str_eq_function);
 
+  ioopm_hash_table_t *location_storage =
+      ioopm_hash_table_create(string_sum_hash, str_eq_function);
+
   cart_table_t *cart_storage = ioopm_hash_table_create(NULL, NULL);
   char answer;
   size_t cart_id_next = 1;
@@ -377,16 +383,16 @@ void event_loop()
         list_db(store);
         break;
       case 'D':
-        delete_merch(store, cart_storage);
+        delete_merch(store, location_storage, cart_storage);
         break;
       case 'E':
-        edit_db(store);
+        edit_db(store, location_storage);
         break;
       case 'S':
         show_stock(store);
         break;
       case 'P':
-        replenish_stock(store);
+        replenish_stock(store, location_storage);
         break;
       case 'C':
         new_cart(cart_storage, cart_id_next);

@@ -46,15 +46,19 @@ void test_remove_item()
   merch_table_t *store =
       ioopm_hash_table_create(string_sum_hash, str_eq_function);
 
+  ioopm_hash_table_t *location_storage =
+      ioopm_hash_table_create(string_sum_hash, str_eq_function);
+
   add_item_to_db(store, "alvin", "test", 100);
   add_item_to_db(store, "max", "test", 100);
 
-  delete_merch(store, NULL);
+  delete_merch(store, location_storage, NULL);
 
   CU_ASSERT_EQUAL(ioopm_hash_table_size(store), 1);
   CU_ASSERT_FALSE(ioopm_hash_table_has_key(store, s_elem("alvin")));
 
   destroy_store(store);
+  destroy_location_storage(location_storage);
 }
 
 void test_edit_item()
@@ -62,10 +66,13 @@ void test_edit_item()
   merch_table_t *store =
       ioopm_hash_table_create(string_sum_hash, str_eq_function);
 
+  ioopm_hash_table_t *location_storage =
+      ioopm_hash_table_create(string_sum_hash, str_eq_function);
+
   add_item_to_db(store, "alvin", "test1", 100);
   add_item_to_db(store, "elias", "test2", 100);
 
-  edit_db(store);
+  edit_db(store, location_storage);
 
   CU_ASSERT_PTR_NULL(ioopm_hash_table_lookup(store, s_elem("alvin")));
 
@@ -77,6 +84,7 @@ void test_edit_item()
   CU_ASSERT_EQUAL(item->price, 200);
 
   destroy_store(store);
+  destroy_location_storage(location_storage);
 }
 
 void test_replenish_stock()
@@ -84,10 +92,13 @@ void test_replenish_stock()
   merch_table_t *store =
       ioopm_hash_table_create(string_sum_hash, str_eq_function);
 
+  ioopm_hash_table_t *location_storage =
+      ioopm_hash_table_create(string_sum_hash, str_eq_function);
+
   add_item_to_db(store, "alvin", "test description", 100);
 
   // Add location A01
-  replenish_stock(store);
+  replenish_stock(store, location_storage);
   merch_t *merch = ioopm_hash_table_lookup(store, s_elem("alvin"))->p;
 
   location_t *a01 = ioopm_linked_list_get(merch->locations, 0).p;
@@ -96,12 +107,12 @@ void test_replenish_stock()
   CU_ASSERT_EQUAL(a01->quantity, 1);
 
   // Input location A01 again, should increase quantity
-  replenish_stock(store);
+  replenish_stock(store, location_storage);
 
   CU_ASSERT_EQUAL(a01->quantity, 2);
 
   // Not existing location B02, should add new location
-  replenish_stock(store);
+  replenish_stock(store, location_storage);
 
   location_t *b02 = ioopm_linked_list_get(merch->locations, 1).p;
   CU_ASSERT_PTR_NOT_NULL(b02);
@@ -109,7 +120,7 @@ void test_replenish_stock()
   CU_ASSERT_EQUAL(b02->quantity, 1);
 
   // Input location B02 again, should increase quantity
-  replenish_stock(store);
+  replenish_stock(store, location_storage);
 
   CU_ASSERT_EQUAL(a01->quantity, 2);
 
@@ -117,6 +128,7 @@ void test_replenish_stock()
   show_stock(store);
 
   destroy_store(store);
+  destroy_location_storage(location_storage);
 }
 
 void test_cart_add()
@@ -124,10 +136,13 @@ void test_cart_add()
   merch_table_t *store =
       ioopm_hash_table_create(string_sum_hash, str_eq_function);
 
+  ioopm_hash_table_t *location_storage =
+      ioopm_hash_table_create(string_sum_hash, str_eq_function);
+
   cart_table_t *cart_storage = ioopm_hash_table_create(NULL, NULL);
 
   add_item_to_db(store, "phone", "test", 100);
-  increase_stock(store, "phone", "A0", 5);
+  increase_stock(store, location_storage, "phone", "A0", 5);
   cart_t *cart1 = new_cart(cart_storage, 1);
 
   cart_add(store, cart_storage);
@@ -145,6 +160,7 @@ void test_cart_add()
   CU_ASSERT_PTR_NULL(lookup);
 
   destroy_store(store);
+  destroy_location_storage(location_storage);
   ioopm_hash_table_destroy(cart_storage);
   destroy_cart(cart1);
   destroy_cart(cart2);
@@ -155,10 +171,13 @@ void test_cart_remove()
   merch_table_t *store =
       ioopm_hash_table_create(string_sum_hash, str_eq_function);
 
+  ioopm_hash_table_t *location_storage =
+      ioopm_hash_table_create(string_sum_hash, str_eq_function);
+
   cart_table_t *cart_storage = ioopm_hash_table_create(NULL, NULL);
 
   add_item_to_db(store, "phone", "test", 100);
-  increase_stock(store, "phone", "A0", 5);
+  increase_stock(store, location_storage, "phone", "A0", 5);
   cart_t *cart1 = new_cart(cart_storage, 1);
 
   add_to_cart(store, cart_storage, 1, "phone", 5);
@@ -174,6 +193,7 @@ void test_cart_remove()
   CU_ASSERT_EQUAL(quantity, 2);
 
   destroy_store(store);
+  destroy_location_storage(location_storage);
   ioopm_hash_table_destroy(cart_storage);
   destroy_cart(cart1);
 }

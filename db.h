@@ -51,13 +51,18 @@ bool location_equals(elem_t a, elem_t b);
 merch_t *create_merch(char *name, char *description, size_t price,
                       location_list_t *locations);
 
-void edit_merch(merch_table_t *store, char *name, merch_t new_value);
+void edit_merch(merch_table_t *store, ioopm_hash_table_t *location_storage,
+                char *name, merch_t new_value);
 
 void destroy_merch(merch_t *merch);
 
 /// @brief Destroys a merch_table and all merch within
 /// @param store table to destroy
 void destroy_store(merch_table_t *store);
+
+/// @brief Destroys a hash table with locations
+/// @param store table to destroy
+void destroy_location_storage(ioopm_hash_table_t *location_storage);
 
 /// @brief creates a merch and inserts it into store
 /// @param store table to add to
@@ -72,8 +77,9 @@ merch_t *add_item_to_db(merch_table_t *store, char *name, char *description,
 /// @param store table to remove from
 /// @param cart_storage carts to remove from (can be NULL)
 /// @param item_name name of item
-void remove_item_from_db(merch_table_t *store, cart_table_t *cart_storage,
-                         merch_t *merch);
+void remove_item_from_db(merch_table_t *store,
+                         ioopm_hash_table_t *location_storage,
+                         cart_table_t *cart_storage, merch_t *merch);
 
 /// @brief true if there exists an item in the store that has shelf in its
 /// locations
@@ -88,8 +94,8 @@ bool is_shelf_taken(merch_table_t *store, char *shelf);
 /// @param shelf shelf to increase stock at
 /// @param quantity quantity to add
 /// @return true if successful
-bool increase_stock(merch_table_t *store, char *item_name, char *shelf,
-                    size_t quantity);
+bool increase_stock(merch_table_t *store, ioopm_hash_table_t *location_storage,
+                    char *item_name, char *shelf, size_t quantity);
 
 /// @brief returns the sum of stock at all locations contained in an item
 /// @param merch item to check

@@ -8,12 +8,6 @@
 
 extern char *strdup(const char *);
 
-void destroy_location(location_t *location)
-{
-  free(location->shelf);
-  free(location);
-}
-
 bool location_equals(elem_t a, elem_t b)
 {
   location_t shelf_1 = *(location_t *)a.p;
@@ -37,7 +31,8 @@ merch_t *create_merch(char *name, char *description, size_t price,
 }
 
 // does not alter locations
-void edit_merch(merch_table_t *store, char *name, merch_t new_value)
+void edit_merch(merch_table_t *store, ioopm_hash_table_t *location_storage,
+                char *name, merch_t new_value)
 {
   merch_t *item = (merch_t *)ioopm_hash_table_lookup(store, s_elem(name))->p;
   assert(item != NULL);
@@ -53,6 +48,21 @@ void edit_merch(merch_table_t *store, char *name, merch_t new_value)
   item->locations = item->locations;
 
   ioopm_hash_table_insert(store, s_elem(item->name), p_elem(item));
+
+  // Edits location_storage. This might have wierd side effects if it's buggy.
+  ioopm_list_iterator_t *iterator = ioopm_list_iterator(item->locations);
+  while (ioopm_iterator_has_next(iterator)) {
+    location_t *location = ioopm_iterator_next(iterator).p;
+    ioopm_hash_table_insert(location_storage, s_elem(location->shelf),
+                            s_elem(item->name));
+  }
+  free(iterator);
+}
+
+void destroy_location(location_t *location)
+{
+  free(location->shelf);
+  free(location);
 }
 
 void destroy_merch(merch_t *merch)
@@ -84,6 +94,11 @@ void destroy_store(merch_table_t *store)
   free(items);
 }
 
+void destroy_location_storage(ioopm_hash_table_t *location_storage)
+{
+  ioopm_hash_table_destroy(location_storage);
+}
+
 merch_t *add_item_to_db(merch_table_t *store, char *name, char *description,
                         size_t price)
 {
@@ -92,16 +107,31 @@ merch_t *add_item_to_db(merch_table_t *store, char *name, char *description,
   return merch;
 }
 
+void remove_from_location_storage(ioopm_hash_table_t *location_storage,
+                                  merch_t *merch)
+{
+  ioopm_list_iterator_t *iterator = ioopm_list_iterator(merch->locations);
+  while (ioopm_iterator_has_next(iterator)) {
+    location_t *location = ioopm_iterator_next(iterator).p;
+    ioopm_hash_table_remove(location_storage, s_elem(location->shelf));
+  }
+  free(iterator);
+}
+
 static void remove_from_cart(elem_t id, elem_t *cart_e, void *item_name)
 {
   cart_t *cart = cart_e->p;
   ioopm_hash_table_remove(cart->items, s_elem(item_name));
 }
 
-void remove_item_from_db(merch_table_t *store, cart_table_t *cart_storage,
-                         merch_t *merch)
+void remove_item_from_db(merch_table_t *store,
+                         ioopm_hash_table_t *location_storage,
+                         cart_table_t *cart_storage, merch_t *merch)
 {
   ioopm_hash_table_remove(store, s_elem(merch->name));
+
+  remove_from_location_storage(location_storage, merch);
+
   if (cart_storage != NULL) {
     ioopm_hash_table_apply_to_all(cart_storage, remove_from_cart, merch->name);
   }
@@ -134,8 +164,8 @@ bool is_shelf_taken(merch_table_t *store, char *shelf)
   return false;
 }
 
-bool increase_stock(merch_table_t *store, char *item_name, char *shelf,
-                    size_t quantity)
+bool increase_stock(merch_table_t *store, ioopm_hash_table_t *location_storage,
+                    char *item_name, char *shelf, size_t quantity)
 {
   if (!is_valid_shelf(shelf)) {
     return false;
@@ -145,6 +175,13 @@ bool increase_stock(merch_table_t *store, char *item_name, char *shelf,
   if (lookup == NULL) {
     return false;
   }
+
+  elem_t *shelf_lookup =
+      ioopm_hash_table_lookup(location_storage, s_elem(shelf));
+  if (shelf_lookup != NULL && shelf_lookup->s != item_name) {
+    return false;
+  }
+
   merch_t *merch = lookup->p;
   ioopm_list_iterator_t *iterator = ioopm_list_iterator(merch->locations);
   while (ioopm_iterator_has_next(iterator)) {
@@ -166,6 +203,8 @@ bool increase_stock(merch_table_t *store, char *item_name, char *shelf,
   new_location->quantity = quantity;
 
   ioopm_linked_list_append(merch->locations, p_elem(new_location));
+  ioopm_hash_table_insert(location_storage, s_elem(new_location->shelf),
+                          s_elem(item_name));
   return true;
 }
 

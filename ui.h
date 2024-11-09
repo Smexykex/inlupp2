@@ -1,6 +1,7 @@
 #pragma once
 
 #include "db.h"
+#include "hash_table.h"
 
 /// @brief Adds a merch to the merch database by asking for a name, a
 /// description and a price.
@@ -16,12 +17,15 @@ void print_item(merch_t *merch);
 /// @param store Hashtable containting all of the merch
 void list_db(merch_table_t *store);
 
-void delete_merch(merch_table_t *store, cart_table_t *cart_storage);
+void delete_merch(merch_table_t *store, ioopm_hash_table_t *location_storage,
+                  cart_table_t *cart_storage);
 
 /// @brief Edits a merch in the merch database by asking for the name of a
 /// merch. It then asks for a new name, description and price.
 /// @param store Hashtable containting all of the merch
-void edit_db(merch_table_t *store);
+/// @param location_storage Hashtable mapping locations to names of merch in
+/// those locations
+void edit_db(merch_table_t *store, ioopm_hash_table_t *location_storage);
 
 /// @brief Prints the location and quantity of a merch. It asks for the name of
 /// merch in the merch database.
@@ -33,7 +37,10 @@ void show_stock(merch_table_t *store);
 /// specific merch or a new shelf and a quantity of new merch.
 /// @note Cannot add to a shelf with a different merch.
 /// @param store Hashtable containting all of the merch
-void replenish_stock(merch_table_t *store);
+/// @param location_storage Hashtable mapping locations to merch in those
+/// locations.
+void replenish_stock(merch_table_t *store,
+                     ioopm_hash_table_t *location_storage);
 
 /// @brief Creates a new cart, adds it to the cart database and returns it.
 /// @param cart_storage Hashtable containing all of the carts.
