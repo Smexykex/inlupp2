@@ -1,8 +1,10 @@
 #include <ctype.h>
+#include <stdbool.h>
 #include <stdio.h>
 #include <string.h>
 
 #include "ask_question.h"
+#include "db.h"
 #include "hash_table.h"
 #include "linked_list.h"
 #include "ui.h"
@@ -305,12 +307,20 @@ void checkout(merch_table_t *store, cart_table_t *cart_storage)
   destroy_cart(cart);
 }
 
-void confirm_quit()
+void confirm_quit(merch_table_t *store, ioopm_hash_table_t *location_storage,
+                  cart_table_t *cart_storage)
 {
   char *answer = ask_question_string("Confirm quit? (Y/n): ");
   if (tolower(answer[0] == 'y')) {
+    destroy_store(store);
+    destroy_location_storage(location_storage);
+    destroy_cart_storage(cart_storage);
+    free(answer);
+
     exit(0);
   };
+
+  free(answer);
 }
 
 void print_menu()
@@ -347,13 +357,22 @@ bool is_menu_option(char c)
 char ask_question_menu()
 {
   char *answer;
-
+  char converted_answer;
   do {
     print_menu();
-    answer = ask_question_string("");
-  } while (!(is_menu_option(answer[0])));
 
-  return answer[0];
+    answer = ask_question_string("");
+    converted_answer = answer[0];
+
+    if (is_menu_option(converted_answer)) {
+      break;
+    }
+
+    free(answer);
+  } while (true);
+
+  free(answer);
+  return converted_answer;
 }
 
 void event_loop()
@@ -414,13 +433,11 @@ void event_loop()
         checkout(store, cart_storage);
         break;
       case 'Q':
-        confirm_quit();
+        confirm_quit(store, location_storage, cart_storage);
         break;
       default:
         break;
     }
     print_line();
   } while (true);
-
-  destroy_store(store);
 }

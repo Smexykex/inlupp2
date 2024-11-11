@@ -4,7 +4,9 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include "common.h"
 #include "db.h"
+#include "hash_table.h"
 
 extern char *strdup(const char *);
 
@@ -329,4 +331,17 @@ void checkout_cart(merch_table_t *store, cart_t *cart)
   }
   free(items);
   free(quantities);
+}
+
+void destroy_cart_storage(cart_table_t *cart_storage)
+{
+  elem_t *carts = ioopm_hash_table_values(cart_storage);
+
+  for (size_t i = 0; i < ioopm_hash_table_size(cart_storage); i++) {
+    cart_t *current_cart = carts[i].p;
+    destroy_cart(current_cart);
+  }
+
+  free(carts);
+  ioopm_hash_table_destroy(cart_storage);
 }

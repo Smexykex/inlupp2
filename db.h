@@ -140,3 +140,7 @@ size_t calculate_cost(merch_table_t *store, cart_t *cart);
 /// @param store store containing items to subtract from
 /// @param cart cart containing items and quantities
 void checkout_cart(merch_table_t *store, cart_t *cart);
+
+/// @brief Destroys cart storage
+/// @param cart_storage Where all carts are stored
+void destroy_cart_storage(cart_table_t *cart_storage);
