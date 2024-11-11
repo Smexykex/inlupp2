@@ -287,6 +287,8 @@ void test_remove_from_cart()
   increase_cart_quantity(cart1, "phone", 5);
   remove_quantity_from_cart(cart1, "phone", 3);
 
+  CU_ASSERT_FALSE(remove_quantity_from_cart(cart1, "invalid name", 1));
+
   size_t quantity = ioopm_hash_table_lookup(cart1->items, s_elem("phone"))->u;
 
   CU_ASSERT_EQUAL(quantity, 2);
@@ -370,6 +372,8 @@ void test_remove_merch()
   increase_stock(store, location_storage, "test1", "A01", 5);
   increase_stock(store, location_storage, "test2", "A02", 5);
 
+  CU_ASSERT_FALSE(add_to_cart(store, cart_storage, 99, "test1", 1));
+
   add_to_cart(store, cart_storage, 1, "test1", 1);
   add_to_cart(store, cart_storage, 1, "test2", 1);
 
@@ -416,6 +420,8 @@ int main()
       (CU_add_test(db_tests, "Get total stock", test_get_total_stock) ==
        NULL) ||
       (CU_add_test(db_tests, "add_to_cart", test_add_to_cart) == NULL) ||
+      (CU_add_test(db_tests, "remove_from_cart", test_remove_from_cart) ==
+       NULL) ||
       (CU_add_test(db_tests, "calculate_cost", test_calculate_cost) == NULL) ||
       (CU_add_test(db_tests, "checkout_cart", test_checkout_cart) == NULL) ||
       (CU_add_test(db_tests, "remove merch", test_remove_merch) == NULL) || 0) {

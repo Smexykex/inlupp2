@@ -16,6 +16,12 @@
 
 - `make clean` deletes all generated files from the directory.
 
+## Note on test coverage
+
+The test suite has a coverage of 97.96%. The only function without 100% coverage
+is `location_equals` which is a trivial function that simply compares the shelf
+strings of two locations.
+
 ## Instructions for use
 
 - After building the program using the build instructions above, the program can

@@ -24,7 +24,7 @@ memtestdb: db_tests
 
 testdbcoverage: db_tests.c common.o linked_list.o iterator.o hash_table.o entry.o
 	$(CC) $(FLAGS) --coverage $^ -lcunit -o db_tests db.c && \
-	./db_tests && gcov -adcfu db_tests-db.gcda db_tests-db.gcno
+	./db_tests && gcov -abcfu db_tests-db.gcda db_tests-db.gcno
 
 ui_tests: ui_tests.c db.o ui.o ask_question.o common.o linked_list.o iterator.o hash_table.o entry.o
 	$(CC) $(FLAGS) $^ -lcunit -o $@
