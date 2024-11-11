@@ -3,6 +3,10 @@ ui_tests
 store
 test_files/all_tests.txt
 
+*.gcno
+*.gcda
+*.gcov
+
 *.dSYM
 *.out
 *.o

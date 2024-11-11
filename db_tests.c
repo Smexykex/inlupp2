@@ -86,6 +86,8 @@ void test_edit_merch()
 
   add_item_to_db(store, "alvin", "test", 100);
 
+  increase_stock(store, location_storage, "alvin", "A00", 1);
+
   merch_t *old_item = ioopm_hash_table_lookup(store, s_elem("alvin"))->p;
   merch_t new_item = {.name = "max",
                       .description = "new desc",
@@ -384,8 +386,7 @@ void test_remove_merch()
 
   destroy_store(store);
   destroy_location_storage(location_storage);
-  destroy_cart(cart);
-  ioopm_hash_table_destroy(cart_storage);
+  destroy_cart_storage(cart_storage);
 }
 
 int main()
