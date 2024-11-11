@@ -39,6 +39,8 @@ void test_input_merch()
   }
 
   destroy_store(store);
+
+  print_line();
 }
 
 void test_remove_item()
@@ -59,6 +61,7 @@ void test_remove_item()
 
   destroy_store(store);
   destroy_location_storage(location_storage);
+  print_line();
 }
 
 void test_edit_item()
@@ -85,6 +88,7 @@ void test_edit_item()
 
   destroy_store(store);
   destroy_location_storage(location_storage);
+  print_line();
 }
 
 void test_replenish_stock()
@@ -129,6 +133,7 @@ void test_replenish_stock()
 
   destroy_store(store);
   destroy_location_storage(location_storage);
+  print_line();
 }
 
 void test_cart_add()
@@ -164,6 +169,7 @@ void test_cart_add()
   ioopm_hash_table_destroy(cart_storage);
   destroy_cart(cart1);
   destroy_cart(cart2);
+  print_line();
 }
 
 void test_cart_remove()
@@ -196,6 +202,7 @@ void test_cart_remove()
   destroy_location_storage(location_storage);
   ioopm_hash_table_destroy(cart_storage);
   destroy_cart(cart1);
+  print_line();
 }
 
 int main()

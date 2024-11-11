@@ -3,6 +3,9 @@
 #include "db.h"
 #include "hash_table.h"
 
+/// @brief Prints a line
+void print_line();
+
 /// @brief Adds a merch to the merch database by asking for a name, a
 /// description and a price.
 /// @param store Hashtable containting all of the merch

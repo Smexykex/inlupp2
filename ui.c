@@ -243,7 +243,7 @@ void cart_add(merch_table_t *store, cart_table_t *cart_storage)
       add_to_cart(store, cart_storage, cart->id, merch->name, quantity);
 
   if (!success) {
-    printf("Not enough in stock");
+    printf("Not enough in stock\n");
   }
 }
 
@@ -262,7 +262,7 @@ void cart_remove(merch_table_t *store, cart_table_t *cart_storage)
   bool success = remove_quantity_from_cart(cart, merch->name, quantity);
 
   if (!success) {
-    printf("Not enough in cart");
+    printf("Not enough in cart\n");
   }
 }
 
