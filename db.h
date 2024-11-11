@@ -52,7 +52,7 @@ merch_t *create_merch(char *name, char *description, size_t price,
                       location_list_t *locations);
 
 void edit_merch(merch_table_t *store, ioopm_hash_table_t *location_storage,
-                char *name, merch_t new_value);
+                char *name, merch_t new_value, cart_table_t *cart_storage);
 
 void destroy_merch(merch_t *merch);
 

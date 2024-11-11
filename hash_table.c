@@ -88,8 +88,8 @@ elem_t *ioopm_hash_table_lookup(ioopm_hash_table_t *ht, elem_t key)
 /// @brief remove any mapping from key to a value
 /// @param ht hash table operated upon
 /// @param key key to remove
-/// @return returns true if a value was removed
-bool ioopm_hash_table_remove(ioopm_hash_table_t *ht, elem_t key)
+/// @return returns the key or NULL pointer if unsuccessful
+elem_t ioopm_hash_table_remove(ioopm_hash_table_t *ht, elem_t key)
 {
   const int bucket = find_bucket(ht, key);
 
@@ -99,10 +99,11 @@ bool ioopm_hash_table_remove(ioopm_hash_table_t *ht, elem_t key)
 
   if (next != NULL && ht->key_equals(next->key, key)) {
     prev->next = next->next;
+    elem_t key = next->key;
     ioopm_entry_destroy(next);
-    return true;
+    return key;
   } else {
-    return false;
+    return p_elem(NULL);
   }
 }
 

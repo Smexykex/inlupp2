@@ -72,10 +72,12 @@ void test_edit_item()
   ioopm_hash_table_t *location_storage =
       ioopm_hash_table_create(string_sum_hash, str_eq_function);
 
+  cart_table_t *cart_storage = ioopm_hash_table_create(NULL, NULL);
+
   add_item_to_db(store, "alvin", "test1", 100);
   add_item_to_db(store, "elias", "test2", 100);
 
-  edit_db(store, location_storage);
+  edit_db(store, location_storage, cart_storage);
 
   CU_ASSERT_PTR_NULL(ioopm_hash_table_lookup(store, s_elem("alvin")));
 
@@ -205,6 +207,7 @@ void test_cart_remove()
   print_line();
 }
 
+void test_cost_after_edit() {}
 int main()
 {
   if (CU_initialize_registry() != CUE_SUCCESS)

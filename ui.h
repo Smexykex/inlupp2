@@ -28,7 +28,8 @@ void delete_merch(merch_table_t *store, ioopm_hash_table_t *location_storage,
 /// @param store Hashtable containting all of the merch
 /// @param location_storage Hashtable mapping locations to names of merch in
 /// those locations
-void edit_db(merch_table_t *store, ioopm_hash_table_t *location_storage);
+void edit_db(merch_table_t *store, ioopm_hash_table_t *location_storage,
+             cart_table_t *cart_storage);
 
 /// @brief Prints the location and quantity of a merch. It asks for the name of
 /// merch in the merch database.

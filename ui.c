@@ -140,7 +140,8 @@ void delete_merch(merch_table_t *store, ioopm_hash_table_t *location_storage,
 }
 
 // TODO A better name might be edit item
-void edit_db(merch_table_t *store, ioopm_hash_table_t *location_storage)
+void edit_db(merch_table_t *store, ioopm_hash_table_t *location_storage,
+             cart_table_t *cart_storage)
 {
   merch_t *merch_to_edit =
       ask_question_merch(store, "Input merch name to edit: ");
@@ -162,7 +163,8 @@ void edit_db(merch_table_t *store, ioopm_hash_table_t *location_storage)
 
   edit_merch(
       store, location_storage, merch_to_edit->name,
-      (merch_t){.name = name, .description = description, .price = price});
+      (merch_t){.name = name, .description = description, .price = price},
+      cart_storage);
 
   free(name);
   free(description);
@@ -218,7 +220,8 @@ void remove_cart(cart_table_t *cart_storage)
 
   cart_t *cart = ask_question_cart(cart_storage, "Cart ID: ");
 
-  char *confirmation = ask_question_string("Are you sure you want to remove? ");
+  char *confirmation =
+      ask_question_string("Are you sure you want to remove? (Y/n)");
   if (confirmation[0] == 'y' || confirmation[0] == 'Y') {
     destroy_cart(cart);
     ioopm_hash_table_remove(cart_storage, i_elem(cart->id));
@@ -234,7 +237,7 @@ void cart_add(merch_table_t *store, cart_table_t *cart_storage)
     return;
   }
 
-  cart_t *cart = ask_question_cart(cart_storage, "\art ID: ");
+  cart_t *cart = ask_question_cart(cart_storage, "Cart ID: ");
 
   merch_t *merch = ask_question_merch(store, "Merch to add to cart: ");
   size_t quantity = ask_question_size("Amount of merch: ");
@@ -277,7 +280,7 @@ void get_cost(merch_table_t *store, cart_table_t *cart_storage)
 
   size_t cost = calculate_cost(store, cart);
 
-  printf("\nTotal cost for cart %zu: %zu.%2zu SEK", cart->id, (cost) / 100,
+  printf("\nTotal cost for cart %zu: %zu.%2zu SEK\n", cart->id, (cost) / 100,
          (cost) % 100);
 }
 
@@ -300,7 +303,7 @@ void confirm_quit(merch_table_t *store, ioopm_hash_table_t *location_storage,
                   cart_table_t *cart_storage)
 {
   char *answer = ask_question_string("Confirm quit? (Y/n): ");
-  if (tolower(answer[0] == 'y')) {
+  if (tolower(answer[0]) == 'y') {
     destroy_store(store);
     destroy_location_storage(location_storage);
     destroy_cart_storage(cart_storage);
@@ -394,7 +397,7 @@ void event_loop()
         delete_merch(store, location_storage, cart_storage);
         break;
       case 'E':
-        edit_db(store, location_storage);
+        edit_db(store, location_storage, cart_storage);
         break;
       case 'S':
         show_stock(store);

@@ -84,6 +84,8 @@ void test_edit_merch()
   merch_table_t *location_storage =
       ioopm_hash_table_create(string_sum_hash, str_eq_function);
 
+  cart_table_t *cart_storage = ioopm_hash_table_create(NULL, NULL);
+
   add_item_to_db(store, "alvin", "test", 100);
 
   increase_stock(store, location_storage, "alvin", "A00", 1);
@@ -94,7 +96,7 @@ void test_edit_merch()
                       .price = 200,
                       .locations = old_item->locations};
 
-  edit_merch(store, location_storage, "alvin", new_item);
+  edit_merch(store, location_storage, "alvin", new_item, cart_storage);
 
   merch_t *edited_item = ioopm_hash_table_lookup(store, s_elem("max"))->p;
   CU_ASSERT(edited_item != NULL);
@@ -393,6 +395,36 @@ void test_remove_merch()
   destroy_cart_storage(cart_storage);
 }
 
+void test_calculate_cost_after_edit()
+{
+  merch_table_t *store =
+      ioopm_hash_table_create(string_sum_hash, str_eq_function);
+
+  ioopm_hash_table_t *location_storage =
+      ioopm_hash_table_create(string_sum_hash, str_eq_function);
+
+  cart_table_t *cart_storage = ioopm_hash_table_create(NULL, NULL);
+
+  add_item_to_db(store, "item", "test", 1);
+
+  increase_stock(store, location_storage, "item", "A1", 5);
+
+  cart_t *cart = create_cart(1);
+  ioopm_hash_table_insert(cart_storage, u_elem(1), p_elem(cart));
+
+  CU_ASSERT_FATAL(add_to_cart(store, cart_storage, 1, "item", 1));
+
+  edit_merch(store, location_storage, "item",
+             (merch_t){.name = "other", .description = "test", .price = 1},
+             cart_storage);
+
+  CU_ASSERT_EQUAL(calculate_cost(store, cart), 1);
+
+  destroy_store(store);
+  destroy_location_storage(location_storage);
+  destroy_cart_storage(cart_storage);
+}
+
 int main()
 {
   if (CU_initialize_registry() != CUE_SUCCESS)
@@ -424,9 +456,14 @@ int main()
        NULL) ||
       (CU_add_test(db_tests, "calculate_cost", test_calculate_cost) == NULL) ||
       (CU_add_test(db_tests, "checkout_cart", test_checkout_cart) == NULL) ||
-      (CU_add_test(db_tests, "remove merch", test_remove_merch) == NULL) || 0) {
-    CU_cleanup_registry();
-    return CU_get_error();
+      (CU_add_test(db_tests, "remove merch", test_remove_merch) == NULL) ||
+      (CU_add_test(db_tests, "Calculate cost after edit",
+                   test_calculate_cost_after_edit) == NULL) ||
+      0) {
+    {
+      CU_cleanup_registry();
+      return CU_get_error();
+    }
   }
 
   CU_basic_set_mode(CU_BRM_VERBOSE);
