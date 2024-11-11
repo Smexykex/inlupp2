@@ -55,7 +55,7 @@ static cart_t *ask_question_cart(cart_table_t *cart_storage, char *question)
 
 void input_merch(merch_table_t *store)
 {
-  char *name = ask_question_string("\nName: ");
+  char *name = ask_question_string("Name: ");
   char *description = ask_question_string("Description: ");
   size_t price = ask_question_size("Price: ");
 
@@ -127,7 +127,7 @@ void delete_merch(merch_table_t *store, ioopm_hash_table_t *location_storage,
     puts("No items to delete!");
     return;
   }
-  merch_t *merch = ask_question_merch(store, "\nInput merch name: ");
+  merch_t *merch = ask_question_merch(store, "Input merch name: ");
 
   char *confirmation =
       ask_question_string("Do you want delete?, type 'y' for yes ");
@@ -144,17 +144,8 @@ void edit_db(merch_table_t *store, ioopm_hash_table_t *location_storage)
 {
   char *name_to_edit;
   elem_t *item;
-  merch_t *merch_to_edit;
-
-  do {
-    name_to_edit = ask_question_string("\nInput merch name to edit: ");
-    printf("%s\n", name_to_edit);
-    item = ioopm_hash_table_lookup(store, s_elem(name_to_edit));
-
-    free(name_to_edit);
-  } while (item == NULL);
-
-  merch_to_edit = (merch_t *)item->p;
+  merch_t *merch_to_edit =
+      ask_question_merch(store, "Input merch name to edit: ");
   print_item(merch_to_edit);
 
   char *name;
@@ -181,7 +172,7 @@ void edit_db(merch_table_t *store, ioopm_hash_table_t *location_storage)
 
 void show_stock(merch_table_t *store)
 {
-  merch_t *merch = ask_question_merch(store, "\nInput merch name: ");
+  merch_t *merch = ask_question_merch(store, "Input merch name: ");
 
   ioopm_list_iterator_t *iterator = ioopm_list_iterator(merch->locations);
   while (ioopm_iterator_has_next(iterator)) {
@@ -193,13 +184,13 @@ void show_stock(merch_table_t *store)
 
 void replenish_stock(merch_table_t *store, ioopm_hash_table_t *location_storage)
 {
-  merch_t *merch = ask_question_merch(store, "\nInput merch name: ");
+  merch_t *merch = ask_question_merch(store, "Input merch name: ");
   char *shelf;
   size_t quantity;
 
   while (true) {
-    shelf = ask_question_shelf("\nInput shelf: ");
-    quantity = ask_question_size("\nInput quantity to add: ");
+    shelf = ask_question_shelf("Input shelf: ");
+    quantity = ask_question_size("Input quantity to add: ");
 
     bool success =
         increase_stock(store, location_storage, merch->name, shelf, quantity);
@@ -227,7 +218,7 @@ void remove_cart(cart_table_t *cart_storage)
     return;
   }
 
-  cart_t *cart = ask_question_cart(cart_storage, "\nCart ID: ");
+  cart_t *cart = ask_question_cart(cart_storage, "Cart ID: ");
 
   char *confirmation = ask_question_string("Are you sure you want to remove? ");
   if (confirmation[0] == 'y' || confirmation[0] == 'Y') {
@@ -245,7 +236,7 @@ void cart_add(merch_table_t *store, cart_table_t *cart_storage)
     return;
   }
 
-  cart_t *cart = ask_question_cart(cart_storage, "\nCart ID: ");
+  cart_t *cart = ask_question_cart(cart_storage, "\art ID: ");
 
   merch_t *merch = ask_question_merch(store, "Merch to add to cart: ");
   size_t quantity = ask_question_size("Amount of merch: ");
@@ -265,7 +256,7 @@ void cart_remove(merch_table_t *store, cart_table_t *cart_storage)
     return;
   }
 
-  cart_t *cart = ask_question_cart(cart_storage, "\nCart ID: ");
+  cart_t *cart = ask_question_cart(cart_storage, "Cart ID: ");
 
   merch_t *merch = ask_question_merch(store, "Merch to remove from cart: ");
   size_t quantity = ask_question_size("Amount of merch: ");
@@ -284,7 +275,7 @@ void get_cost(merch_table_t *store, cart_table_t *cart_storage)
     return;
   }
 
-  cart_t *cart = ask_question_cart(cart_storage, "\nCart ID: ");
+  cart_t *cart = ask_question_cart(cart_storage, "Cart ID: ");
 
   size_t cost = calculate_cost(store, cart);
 
@@ -299,7 +290,7 @@ void checkout(merch_table_t *store, cart_table_t *cart_storage)
     return;
   }
 
-  cart_t *cart = ask_question_cart(cart_storage, "\nCart ID: ");
+  cart_t *cart = ask_question_cart(cart_storage, "Cart ID: ");
 
   checkout_cart(store, cart);
 
