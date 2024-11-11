@@ -223,8 +223,8 @@ void remove_cart(cart_table_t *cart_storage)
   char *confirmation =
       ask_question_string("Are you sure you want to remove? (Y/n)");
   if (confirmation[0] == 'y' || confirmation[0] == 'Y') {
-    destroy_cart(cart);
     ioopm_hash_table_remove(cart_storage, i_elem(cart->id));
+    destroy_cart(cart);
   }
 
   free(confirmation);

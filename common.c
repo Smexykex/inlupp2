@@ -28,11 +28,17 @@ bool is_valid_shelf(char *shelf)
     return false;
   }
   ++shelf;
+
+  if (*shelf == '\0') {
+    return false;
+  }
+
   while (*shelf != '\0') {
     if (!isdigit(*shelf)) {
       return false;
     }
     ++shelf;
   }
+
   return true;
 }
