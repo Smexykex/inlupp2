@@ -142,8 +142,6 @@ void delete_merch(merch_table_t *store, ioopm_hash_table_t *location_storage,
 // TODO A better name might be edit item
 void edit_db(merch_table_t *store, ioopm_hash_table_t *location_storage)
 {
-  char *name_to_edit;
-  elem_t *item;
   merch_t *merch_to_edit =
       ask_question_merch(store, "Input merch name to edit: ");
   print_item(merch_to_edit);
