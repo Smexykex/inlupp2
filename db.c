@@ -49,7 +49,6 @@ void update_carts(cart_table_t *cart_storage, char *current_name,
   free(carts);
 }
 
-// does not alter locations
 void edit_merch(merch_table_t *store, ioopm_hash_table_t *location_storage,
                 char *name, merch_t new_value, cart_table_t *cart_storage)
 {
@@ -142,7 +141,10 @@ void remove_from_location_storage(ioopm_hash_table_t *location_storage,
 static void remove_from_cart(elem_t id, elem_t *cart_e, void *item_name)
 {
   cart_t *cart = cart_e->p;
-  ioopm_hash_table_remove(cart->items, s_elem(item_name));
+  elem_t removed_key = ioopm_hash_table_remove(cart->items, s_elem(item_name));
+  if (strcmp(removed_key.s, (char *) item_name)) {
+    free(removed_key.s);
+  }
 }
 
 void remove_item_from_db(merch_table_t *store,
@@ -217,6 +219,19 @@ void destroy_cart(cart_t *cart)
   free(keys);
   ioopm_hash_table_destroy(cart->items);
   free(cart);
+}
+
+void destroy_cart_storage(cart_table_t *cart_storage)
+{
+  elem_t *carts = ioopm_hash_table_values(cart_storage);
+
+  for (size_t i = 0; i < ioopm_hash_table_size(cart_storage); i++) {
+    cart_t *cart = carts[i].p;
+    destroy_cart(cart);
+  }
+
+  free(carts);
+  ioopm_hash_table_destroy(cart_storage);
 }
 
 struct name_sum {
@@ -356,17 +371,4 @@ void checkout_cart(merch_table_t *store, cart_t *cart)
   }
   free(items);
   free(quantities);
-}
-
-void destroy_cart_storage(cart_table_t *cart_storage)
-{
-  elem_t *carts = ioopm_hash_table_values(cart_storage);
-
-  for (size_t i = 0; i < ioopm_hash_table_size(cart_storage); i++) {
-    cart_t *cart = carts[i].p;
-    destroy_cart(cart);
-  }
-
-  free(carts);
-  ioopm_hash_table_destroy(cart_storage);
 }

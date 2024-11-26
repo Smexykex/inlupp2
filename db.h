@@ -18,14 +18,19 @@ typedef ioopm_hash_table_t cart_items_table_t;
 // key: size_t id, value: cart_t cart
 typedef ioopm_hash_table_t cart_table_t;
 
+
 typedef char *shelf_t;
 
+// Definition of location_t. 
+// Consists of the name of the shelf and how many are stored there
 typedef struct location location_t;
 struct location {
   shelf_t shelf;
   size_t quantity;
 };
 
+// Definition of merch_t.
+// Consists of the name, description, price and locations of a merch. 
 typedef struct merch merch_t;
 struct merch {
   char *name;
@@ -34,13 +39,17 @@ struct merch {
   location_list_t *locations;
 };
 
+// Definition of cart_t. 
+// Consists of the id of the cart and what items the cart contains.
 typedef struct cart cart_t;
-
 struct cart {
   size_t id;
   cart_items_table_t *items;
 };
 
+/// @brief Destroys a location
+/// @note Does not free the key and values, only the hash table
+/// @param location pointer to the location to be freed 
 void destroy_location(location_t *location);
 
 /// @brief true if locations have the same shelf, ignores other values
@@ -48,15 +57,30 @@ void destroy_location(location_t *location);
 /// @param b second location to check (as elem_t void *)
 bool location_equals(elem_t a, elem_t b);
 
+/// @brief Creates a new merch, puts it on the heap and returns a pointer to it
+/// @param store table to add to
+/// @param name name of item
+/// @param description description of item
+/// @param price price of item
+/// @return pointer to the created merch
 merch_t *create_merch(char *name, char *description, size_t price,
                       location_list_t *locations);
 
+/// @brief Edits a merch in the store by copying from a new merch
+/// @note This will free the string and description strings
+/// @param store table to edit from
+/// @param location_storage location table to edit from
+/// @param name name of item to edit
+/// @param new_value new merch to copy data from
+/// @param cart_storage cart table to edit from
 void edit_merch(merch_table_t *store, ioopm_hash_table_t *location_storage,
                 char *name, merch_t new_value, cart_table_t *cart_storage);
 
+/// @brief Destroys a merch, which includes the name, description and locations
+/// @param store Merch to destroy
 void destroy_merch(merch_t *merch);
 
-/// @brief Destroys a merch_table and all merch within
+/// @brief Destroys a merch_table_t and all merch within
 /// @param store table to destroy
 void destroy_store(merch_table_t *store);
 
@@ -101,9 +125,17 @@ bool increase_stock(merch_table_t *store, ioopm_hash_table_t *location_storage,
 /// @param merch item to check
 size_t get_total_stock(merch_t *merch);
 
+/// @brief Creates a new cart
+/// @param id The unqiue number that the new cart will have
 cart_t *create_cart(size_t id);
 
+/// @brief Destroys a cart
+/// @param cart The cart to destroy
 void destroy_cart(cart_t *cart);
+
+/// @brief Destroys cart storage
+/// @param cart_storage Where all carts are stored
+void destroy_cart_storage(cart_table_t *cart_storage);
 
 /// @brief increases the quantity of an item in a cart
 /// @param cart cart to work on
@@ -140,7 +172,3 @@ size_t calculate_cost(merch_table_t *store, cart_t *cart);
 /// @param store store containing items to subtract from
 /// @param cart cart containing items and quantities
 void checkout_cart(merch_table_t *store, cart_t *cart);
-
-/// @brief Destroys cart storage
-/// @param cart_storage Where all carts are stored
-void destroy_cart_storage(cart_table_t *cart_storage);

@@ -90,6 +90,7 @@ void test_edit_item()
 
   destroy_store(store);
   destroy_location_storage(location_storage);
+  destroy_cart_storage(cart_storage);
   print_line();
 }
 

@@ -108,6 +108,7 @@ void test_edit_merch()
 
   destroy_store(store);
   destroy_location_storage(location_storage);
+  destroy_cart_storage(cart_storage);
 }
 
 void test_increase_stock()
